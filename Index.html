@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Commerce Lernprogramm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Einbindung der Matter.js Bibliothek -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            font: 400 100%/1.25 "Roboto", sans-serif;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header-Bereich */
+        header {
+            position: relative;
+            width: 100%;
+            height: 300px; /* Höhe des Headers anpassen */
+            overflow: hidden;
+            background-color: #2e8b57; /* Hintergrundfarbe angepasst */
+            flex-shrink: 0;
+        }
+
+        /* Animationsbereich innerhalb des Headers */
+        #container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Hilfs-Canvas für Matter.js */
+        #helper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            z-index: -1;
+        }
+
+        /* Menü-Elemente */
+        .menu__item {
+            background-color: #f7d794;
+            border: 3px solid #f5cd79;
+            border-radius: 1.5em;
+            box-shadow: inset 0 0 0 .1em currentColor;
+            font-size: 1.15rem;
+            position: absolute;
+        }
+
+        .menu__item:hover {
+            background-color: #f5cd79;
+        }
+
+        .menu__link {
+            color: #303952;
+            text-decoration: none;
+            display: block;
+            padding: .75em 3em;
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* Styles für den Button */
+        .button-style {
+            background-color: #f7d794;
+            border: 3px solid #f5cd79;
+            border-radius: 1.5em;
+            box-shadow: inset 0 0 0 .1em currentColor;
+            font-size: 2rem; /* Größere Schriftgröße */
+            display: inline-block;
+            margin: 30px auto;
+            cursor: pointer;
+            padding: 1em 3em; /* Größeres Padding */
+            color: #303952;
+            text-decoration: none;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .button-style:hover {
+            background-color: #f5cd79;
+        }
+
+        /* Hauptinhalt */
+        .content {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #2e8b57;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+            flex-shrink: 0;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        /* Responsives Design */
+        @media (max-width: 600px) {
+            .button-style {
+                width: 80%;
+                font-size: 1.5rem;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header mit Animation -->
+    <header>
+        <section id="container">
+            <ul class="menu">
+                <li class="menu__item">
+                    <a href="#1" class="menu__link">
+                        Produkte
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#2" class="menu__link">
+                        Kategorien
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#3" class="menu__link">
+                        Warenkorb
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#4" class="menu__link">
+                        Kasse
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#5" class="menu__link">
+                        Bestellungen
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#6" class="menu__link">
+                        Konto
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#7" class="menu__link">
+                        Wunschliste
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#8" class="menu__link">
+                        Support
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#9" class="menu__link">
+                        Angebote
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#10" class="menu__link">
+                        Neuheiten
+                    </a>
+                </li>
+                <li class="menu__item">
+                    <a href="#11" class="menu__link">
+                        Bestseller
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <canvas id="helper"></canvas>
+    </header>
+
+    <!-- Hauptinhalt mit Button -->
+    <div class="content">
+        <a href="e-commerce lernprogramm.html" class="button-style">Lerne mit Mo!</a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Dieses Programm dient nicht zu Verkaufszwecken.</p>
+        <p>Alle Rechte vorbehalten © Mohamed Ahadut</p>
+    </footer>
+
+    <!-- JavaScript-Code -->
+    <script>
+        (function () {
+            const WALL_THICKNESS = 80;
+            // Der Container und der Hilfs-Canvas
+            const MATTER_CONTAINER = document.querySelector("#container");
+            const MATTER_HELPER = document.querySelector("#helper");
+
+            let Engine = Matter.Engine,
+                Render = Matter.Render,
+                Runner = Matter.Runner,
+                Bodies = Matter.Bodies,
+                World = Matter.World,
+                Composite = Matter.Composite;
+
+            let engine = Engine.create();
+            let render = Render.create({
+                element: MATTER_HELPER,
+                engine: engine,
+                options: {
+                    width: MATTER_CONTAINER.offsetWidth,
+                    height: MATTER_CONTAINER.offsetHeight,
+                    wireframes: false,
+                    background: 'transparent'
+                }
+            });
+
+            let domBodies = document.querySelectorAll(".menu__item");
+            let matterBodies = {};
+            let runner;
+            let leftWall, rightWall, ground;
+
+            init();
+
+            function init() {
+                createBounds();
+                // Füge die Grenzen zur Welt hinzu
+                Composite.add(engine.world, [leftWall, rightWall, ground]);
+                // Starte den Renderer
+                Render.run(render);
+                // Erstelle den Runner
+                runner = Runner.create();
+                // Starte die Engine
+                Runner.run(runner, engine);
+                // Erstelle die Matter.js Körper für die HTML-Elemente
+                createMatterBodies();
+                World.add(engine.world, Object.values(matterBodies));
+                window.requestAnimationFrame(updateElementPositions);
+                window.addEventListener("resize", () => handleResize());
+            }
+
+            function createBounds() {
+                ground = Bodies.rectangle(
+                    MATTER_CONTAINER.offsetWidth / 2,
+                    MATTER_CONTAINER.offsetHeight + WALL_THICKNESS / 2,
+                    6000,
+                    WALL_THICKNESS,
+                    { isStatic: true }
+                );
+
+                leftWall = Bodies.rectangle(
+                    0 - WALL_THICKNESS / 2,
+                    MATTER_CONTAINER.offsetHeight / 2,
+                    WALL_THICKNESS,
+                    MATTER_CONTAINER.offsetHeight * 5,
+                    { isStatic: true }
+                );
+
+                rightWall = Bodies.rectangle(
+                    MATTER_CONTAINER.offsetWidth + WALL_THICKNESS / 2,
+                    MATTER_CONTAINER.offsetHeight / 2,
+                    WALL_THICKNESS,
+                    MATTER_CONTAINER.offsetHeight * 5,
+                    { isStatic: true }
+                );
+            }
+
+            function createMatterBodies() {
+                domBodies.forEach(function (domBody) {
+                    let matterBody = Bodies.rectangle(
+                        MATTER_CONTAINER.offsetWidth / 2,
+                        -MATTER_CONTAINER.offsetHeight,
+                        domBody.offsetWidth,
+                        domBody.offsetHeight,
+                        {
+                            chamfer: {
+                                radius: domBody.offsetHeight / 2
+                            },
+                            restitution: 0.925,
+                            density: Math.random() * 15,
+                            angle: Math.random() * 10,
+                            friction: Math.random() * 50,
+                            frictionAir: Math.random() / 150,
+                            render: {
+                                fillStyle: '#f7d794',
+                                strokeStyle: '#f5cd79',
+                                lineWidth: 3
+                            }
+                        }
+                    );
+                    domBody.id = matterBody.id;
+                    matterBodies[matterBody.id] = matterBody;
+                });
+            }
+
+            function updateElementPositions() {
+                domBodies.forEach((domBody) => {
+                    let matterBody = matterBodies[domBody.id];
+
+                    if (matterBody) {
+                        domBody.style.transform =
+                            "translate( " +
+                            (-domBody.offsetWidth + matterBody.position.x + domBody.offsetWidth / 2) +
+                            "px, " +
+                            (-domBody.offsetHeight +
+                                matterBody.position.y +
+                                domBody.offsetHeight / 2) +
+                            "px )";
+                        domBody.style.transform += "rotate( " + matterBody.angle + "rad )";
+                    }
+                });
+
+                window.requestAnimationFrame(updateElementPositions);
+            }
+
+            function handleResize() {
+                render.canvas.width = MATTER_CONTAINER.offsetWidth;
+                render.canvas.height = MATTER_CONTAINER.offsetHeight;
+
+                Matter.Render.setPixelRatio(render, window.devicePixelRatio);
+
+                Matter.Body.setPosition(
+                    ground,
+                    Matter.Vector.create(
+                        MATTER_CONTAINER.offsetWidth / 2,
+                        MATTER_CONTAINER.offsetHeight + WALL_THICKNESS / 2
+                    )
+                );
+
+                Matter.Body.setPosition(
+                    leftWall,
+                    Matter.Vector.create(
+                        0 - WALL_THICKNESS / 2,
+                        MATTER_CONTAINER.offsetHeight / 2
+                    )
+                );
+
+                Matter.Body.setPosition(
+                    rightWall,
+                    Matter.Vector.create(
+                        MATTER_CONTAINER.offsetWidth + WALL_THICKNESS / 2,
+                        MATTER_CONTAINER.offsetHeight / 2
+                    )
+                );
+            }
+        })();
+    </script>
+</body>
+</html>

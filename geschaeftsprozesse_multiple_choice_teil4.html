@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Commerce Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .options, .matching-options, .matching-items {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li, .matching-items li {
+            margin-bottom: 10px;
+        }
+        .options li label {
+            display: block;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #progress {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #submit-answer {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        #restart, #back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+        .matching-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .matching-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .matching-row input[type="text"] {
+            width: 50px;
+            margin-right: 10px;
+        }
+        .matching-options {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>E-Commerce Quiz</h1>
+    <div id="question-container">
+        <!-- Die Frage wird hier eingefügt -->
+    </div>
+    <div id="progress">
+        Frage <span id="current-question-number">1</span> von <span id="total-questions">33</span>
+    </div>
+    <div id="result"></div>
+    <button id="submit-answer" style="display: none;">Antwort absenden</button>
+    <button id="restart" style="display: none;">Quiz neu starten</button>
+    <button id="back-button">Zurück</button>
+</div>
+
+<script>
+    // Fragen mit verschiedenen Typen
+    const questions = [
+        // Vorherige Fragen (1-13) hier einfügen
+        // Beispiel:
+        {
+            question: "1. Sie unterbreiten den Vorschlag, die App mit Werbemaßnahmen in der kostenfreien Version zu subventionieren. Als Abrechnungsmethode sehen Sie das Verfahren Cost per Click (CPC). Welche Beschreibung trifft auf diese Abrechnungsmethode zu?",
+            type: "single",
+            options: [
+                "CPC ist keine Abrechnungsmethode im Online-Marketing, sondern bezieht sich auf die Klickrate innerhalb der App.",
+                "Je häufiger in der App geklickt wird, desto mehr muss an den Entwickler für die Nutzung gezahlt werden.",
+                "CPC ist eine Abrechnungsmethode im Online-Marketing, die nur bei Lastschriftverfahren eingesetzt wird.",
+                "CPC beschreibt eine Abrechnungsmethode im Online-Marketing, bei der pro Klick auf ein Werbemittel abgerechnet wird.",
+                "Durch CPC spart man sich Inkasso."
+            ],
+            correctAnswer: [3]
+        },
+        // Weitere Fragen 2 bis 13 hinzufügen...
+
+        // Neue Fragen hinzufügen (ab Frage 14)
+        {
+            question: "14. Zu der Implementierung der Produktkategorie Camping-Tourismus in die bestehende Shop-Software werden Sie mit der Erstellung eines Lastenhefts beauftragt. Geben Sie an, welche 2 Darstellungen mit einem Lastenheft übereinstimmen!",
+            type: "multiple",
+            options: [
+                "1. Das Lastenheft beschreibt die gesamte Funktionalität, die eine Software erfüllen soll, und dient als Grundlage für die Einhaltung von Angeboten.",
+                "2. Das Lastenheft enthält eine vollständige Anforderungsbeschreibung des Auftraggebers an die Lieferungen und Leistungen eines Auftragnehmers.",
+                "3. Das Lastenheft enthält eine spezifizierte Beschreibung des Auftragnehmers, wie er die Anforderungen des Auftraggebers lösen möchte.",
+                "4. Das Lastenheft ist der vom Auftraggeber erstellte Projektplan, mit dem das Pflichtenheft des Auftraggebers erfüllt wird.",
+                "5. Das Lastenheft enthält das detaillierte Arbeitskonzept für die gesamte Umsetzung eines Projekts.",
+                "6. Das Lastenheft beschreibt die Vorgehensweise des Auftragnehmers, wie er die Anforderungen des Auftraggebers umsetzen möchte."
+            ],
+            correctAnswer: [0,1] // Indizes beginnen bei 0
+        },
+        {
+            question: "15. Geben Sie an, was neben der Rolle des Scrum-Masters die 2 weiteren formalen Rollen im Scrum-Prozess sind!",
+            type: "multiple",
+            options: [
+                "1. Product Owner",
+                "2. Macher",
+                "3. Kritiker",
+                "4. Ablehnender",
+                "5. Kreativer",
+                "6. Entwickler"
+            ],
+            correctAnswer: [0,5]
+        },
+        {
+            question: "16. Geben Sie neben der Validität ein weiteres Kriterium für eine methodische Bewertung an!",
+            type: "single",
+            options: [
+                "1. Unterschiedlichkeit",
+                "2. Subjektivität",
+                "3. Objektivität",
+                "4. Geeicht",
+                "5. Transparenz"
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "17. Sie überlegen, zusätzlich eine Nutzwertanalyse vorzunehmen. Geben Sie an, welche Darstellung zu dieser Analysemethode korrekt ist!",
+            type: "single",
+            options: [
+                "1. Die Nutzwertanalyse ist eine qualitative, nicht-monetäre Analysemethode.",
+                "2. Die Nutzwertanalyse ist eine monetäre, nicht-qualitative Analysemethode.",
+                "3. Die Nutzwertanalyse ist ausschließlich eine monetäre Analysemethode.",
+                "4. Die Nutzwertanalyse ist eine zukunftsorientierte Analysemethode aus der Betriebswirtschaftslehre zur Betrachtung abgeschlossener Projekte.",
+                "5. Die Nutzwertanalyse ist eine bildhafte Darstellung einer zukünftigen Situation."
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "18. Die Globetrader GmbH geht davon aus, dass sich Nutzer, die über den Search-Engine-Advertising Kanal auf den Online-Shop gelangen, bereits in einer fortgeschrittenen Phase ihrer Customer Journey befinden und sich mit Produktalternativen sowie dem anstehenden Kauf eines Rucksacks bewusst auseinandersetzen. Geben Sie an, in welcher Funnel-Phase diese Nutzer zu verorten sind!",
+            type: "single",
+            options: [
+                "1. Awareness",
+                "2. Retention",
+                "3. Consideration",
+                "4. Purchase",
+                "5. Advocacy"
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "19. Im Search-Engine-Marketing (SEA) wird üblicherweise per CPC abgerechnet. Geben Sie an, in welcher Zeile dieses Abrechnungsmodell korrekt benannt ist!",
+            type: "single",
+            options: [
+                "1. Cost-per-Conversion",
+                "2. Cost-per-Click",
+                "3. Cost-per-Contact",
+                "4. Cost-per-Cooperation",
+                "5. Cost-per-Cost"
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "20. Sie werden beauftragt, auf Basis der vorliegenden Daten eine Deckungsbeitragsrechnung durchzuführen. Geben Sie zunächst an, welche Darstellung zum Deckungsbeitrag richtig ist!",
+            type: "single",
+            options: [
+                "1. Der Deckungsbeitrag trägt zur Deckung der variablen Kosten bei.",
+                "2. Der Deckungsbeitrag deckt sämtliche im Unternehmen entstandenen Kosten ab.",
+                "3. Der Deckungsbeitrag errechnet sich durch Abzug der variablen Kosten von der Absatzmenge.",
+                "4. Ein negativer Deckungsbeitrag bedeutet Verlust für das Unternehmen.",
+                "5. Der Deckungsbeitrag spielt in der Sortimentsgestaltung keine Rolle."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "21. Geben Sie in diesem Zusammenhang an, welche Darstellung zur Gewinnschwelle korrekt ist!",
+            type: "single",
+            options: [
+                "1. Die Gewinnschwelle errechnet sich durch Abzug der fixen Kosten von den variablen Kosten.",
+                "2. Die Gewinnschwelle gibt das Verhältnis der fixen Kosten zu den variablen Kosten an.",
+                "3. Die Gewinnschwelle gibt die Absatzmenge an, ab der alle Kosten durch die Umsatzerlöse gedeckt sind.",
+                "4. Die Gewinnschwelle ist der Punkt, an dem die Nutzkosten zu Leerkosten werden.",
+                "5. Die Gewinnschwelle spielt im E-Commerce überhaupt keine Rolle."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "22. Für die Beurteilung des wirtschaftlichen Erfolgs von Sortimentsbereichen sollen auch Kennzahlen aus dem externen Rechnungswesen betrachtet werden. Prüfen Sie, welche Kennziffer korrekt beschrieben ist!",
+            type: "single",
+            options: [
+                "1. Bei der Umsatzrentabilität werden die Kapitalanteile aller Gesellschafter ins Verhältnis zum nicht ausgeschütteten Gewinn gesetzt.",
+                "2. Bei der Eigenkapitalrentabilität wird das Fremdkapital ins Verhältnis zum Eigenkapital gesetzt.",
+                "3. Bei der Liquidität 1. Grades werden die flüssigen Mittel ins Verhältnis zu den kurzfristigen Verbindlichkeiten gesetzt.",
+                "4. Bei der Liquidität 2. Grades werden alle Werte der Aktivseite ins Verhältnis zu den kurzfristigen Verbindlichkeiten gesetzt.",
+                "5. Bei der Eigenkapitalrentabilität wird das Eigenkapital ins Verhältnis zum Fremdkapital gesetzt."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "23. Ein Mitarbeiter merkt an, dass die Absatzzahlen der Dachzelte insgesamt gering sind und gleichzeitig die Lagerkosten sowie die Kapitalbindung hoch ausfallen. Er regt an, das Sortiment der Globetrader GmbH zu verschlanken und die Kfz-Dachzelte komplett auszulisten. Prüfen Sie, welches Argument für die vorgeschlagene Sortimentsbereinigung spricht!",
+            type: "single",
+            options: [
+                "1. Die Kunden der Globetrader GmbH erwarten Kfz-Dachzelte im Sortiment.",
+                "2. Käufer von Kfz-Dachzelten können der Globetrader GmbH Umsätze durch Zusatzverkäufe bringen.",
+                "3. Die Globetrader GmbH kann ihre Stellung als Vollsortimenter gegenüber dem Wettbewerb stärken.",
+                "4. Die Globetrader GmbH verbreitert ihr Sortiment durch die Kfz-Dachzelte.",
+                "5. Kfz-Dachzelte haben einen hohen Beratungsbedarf und verursachen hohe Transportkosten."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "24. Prüfen Sie, welche Darstellung zum Newsletter-Marketing korrekt ist!",
+            type: "single",
+            options: [
+                "1. Der Händler ist verpflichtet, mit der Anmeldung zum E-Mail-Newsletter Name und Adresse des Kunden abzufragen.",
+                "2. Eine Einwilligung der Empfänger ist bei Werbung mit ähnlichen Produkten an aktive Bestandskunden per E-Mail-Newsletter nicht zwingend erforderlich.",
+                "3. Die Datenschutzgrundverordnung DSGVO hat im Hinblick auf die Einwilligung Vorrang vor den Regelungen des UWG.",
+                "4. Im Checkout darf die Werbeeinwilligung per Häkchen vorausgewählt sein.",
+                "5. Wenn der Interessent aktiv ein Häkchen gesetzt hat, entfällt der Versand einer Anmeldebestätigung an die eingegebene E-Mail-Adresse."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "25. Sie überlegen auch die Möglichkeit, Bannerwerbung einzusetzen. Prüfen Sie, bei welcher Beschreibung es sich um ein Superbanner handelt!",
+            type: "single",
+            options: [
+                "1. Nutzt die gesamte Seitenbreite einer Website und bietet dadurch viel Raum für eine kreative Umsetzung der Werbebotschaft",
+                "2. Banner, die besonders hoch sind und meist links oder rechts am Rand der Website angebracht sind.",
+                "3. Werden direkt im redaktionellen Umfeld der Websites platziert (hohe Aufmerksamkeit)",
+                "4. Werbung, die sich mit dem eigentlichen Inhalt der Website verbindet, sodass der Kunde die Werbung nicht immer sofort bemerkt.",
+                "5. Hierbei wird das Banner selbst erst aktiv, wenn ein Nutzer auf einer Website mit seiner Maus über das Banner scrollt"
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "26. Sie rechnen am Markt für Fitnesstrainer mit starker Konkurrenz. Prüfen Sie, welche Darstellung zur kurzfristigen Preisuntergrenze in diesem Zusammenhang zutreffend ist!",
+            type: "single",
+            options: [
+                "1. Die kurzfristige Preisuntergrenze trägt zur Deckung der fixen Kosten bei.",
+                "2. Die kurzfristige Preisuntergrenze errechnet sich durch Abzug der variablen Kosten von der Absatzmenge.",
+                "3. Die kurzfristige Preisuntergrenze deckt nur die variablen Kosten im Unternehmen ab.",
+                "4. Die kurzfristige Preisuntergrenze deckt sämtliche im Unternehmen entstandenen Kosten ab.",
+                "5. Die kurzfristige Preisuntergrenze spielt in der Sortimentspolitik keine Rolle."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "27. Im Controlling wird neben dem Deckungsbeitrag mit weiteren Key Performance Indicators (KPI's) bzw. Kennzahlen gearbeitet. Geben Sie an, welcher Sachverhalt zu Kennzahlen zutreffend ist!",
+            type: "single",
+            options: [
+                "1. Kennzahlen werden ausschließlich in der Produktion verwendet.",
+                "2. Kennzahlen werden nur im Marketing verwendet.",
+                "3. Es werden absolute, relative und latente Kennzahlen unterschieden.",
+                "4. Kennzahlen werden nur in Großkonzernen ausgewertet.",
+                "5. Kennzahlen dienen der Steuerung des Unternehmens im Rahmen des Controllings."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "28. Nach Auswertung der Kostensituation hat das Controlling die Anzahl der Retouren als zu vermindernden Kostenfaktor im Unternehmen identifiziert. Prüfen Sie, welche Darstellung zur Retourenquote korrekt ist!",
+            type: "single",
+            options: [
+                "1. Die Retourenquote wird berechnet, indem die Anzahl der Retouren durch die Anzahl der Gesamtverkäufe dividiert wird.",
+                "2. Die Retourenquote kann nur in Geldeinheiten berechnet werden.",
+                "3. Die Retourenquote wird berechnet, indem die Anzahl der Gesamtverkäufe durch die Anzahl der Retouren dividiert wird.",
+                "4. Die Retourenquote kann nur geschätzt und nicht genauer berechnet werden.",
+                "5. Die Retourenquote kann nur auf den einzelnen Artikel hin berechnet werden."
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "29. Geben Sie an, um welches Abrechnungsmodell es sich hierbei handelt!",
+            type: "single",
+            options: [
+                "1. CPM",
+                "2. CPO",
+                "3. CPC",
+                "4. CPL",
+                "5. CPV"
+            ],
+            correctAnswer: [1] // Antwort: CPO
+        },
+        {
+            question: "30. Prüfen Sie, welche Darstellung zur Erweiterung des Mobile-Vertriebs durch den Social-Media-Kanal falsch ist!",
+            type: "single",
+            options: [
+                "1. Durch die Nutzung unterschiedlicher mobiler Vertriebskanäle kann die Globetrader GmbH gezielt unterschiedliche Kundengruppen ansprechen.",
+                "2. Über Social-Media kann die Globetrader GmbH neue Kunden akquirieren.",
+                "3. Beim Vertrieb über Social-Media-Kanäle können Conversion-Pfade mit nur wenigen Touchpoints entstehen.",
+                "4. Aufgrund der grundsätzlich geringen Reichweiten von Social-Media-Plattformen sind diese als Vertriebskanal für die Globetrader GmbH ungeeignet.",
+                "5. Über Social-Media können die Nutzer zu Impulskäufen motiviert werden."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "31. Geben Sie an, wozu der Globetrader GmbH ein Angebotsvergleich dient bzw. welche Kriterien Sie dabei berücksichtigen müssen!",
+            type: "single",
+            options: [
+                "1. Der Angebotsvergleich wird zur Kalkulation des Angebotspreises eines Artikels benötigt.",
+                "2. Der Angebotsvergleich wird nur nach quantitativen Kriterien durchgeführt.",
+                "3. Der Angebotsvergleich wird nur nach qualitativen Kriterien durchgeführt.",
+                "4. Der Angebotsvergleich wird nach quantitativen und qualitativen Kriterien durchgeführt.",
+                "5. Der Angebotsvergleich dient der Ermittlung der Bezugskosten eines Artikels."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "32. Die Globetrader GmbH verwendet verschiedene Methoden und Kalkulationsinstrumente. Unter anderem wird die Nutzwertanalyse angewandt. Prüfen Sie, welcher Sachverhalt dazu richtig beschrieben ist!",
+            type: "single",
+            options: [
+                "1. Die Nutzwertanalyse ist der quantitative Teil des Angebotsvergleichs.",
+                "2. Die Nutzwertanalyse wird im Rahmen der Kundengewinnung eingesetzt.",
+                "3. Die Nutzwertanalyse beurteilt qualitative Kriterien der Kaufentscheidung.",
+                "4. Die Nutzwertanalyse dient zur Messung des Produktnutzens für den Kunden.",
+                "5. Die Nutzwertanalyse kann Sachverhalte nicht in Geldwert ausweisen."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "33. Werbung ist für die Globetrader GmbH als Verkaufsmaßnahme von wesentlicher Bedeutung und bedarf einer präzisen Planung. Welches Element ordnen Sie richtig der Werbeplanung zu?",
+            type: "single",
+            options: [
+                "1. Streudreieck",
+                "2. Werbepause",
+                "3. Werbekreis",
+                "4. Werbeobjekt",
+                "5. Marketingmix"
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "34. Bei der Prüfung der Suchmaschinen-Präsenzen fällt Ihnen auf, dass eine Filiale der Globetrader GmbH kein vollständiges Google My Business (GMB)-Profil aufweist. Geben Sie in diesem Zusammenhang an, welche Darstellung zu GMB-Profilen falsch ist!",
+            type: "single",
+            options: [
+                "1. Google erstellt zu jedem Unternehmen in Google My Business eine eigene redaktionelle Beschreibung.",
+                "2. Die Informationen, die ein Unternehmen in GMB zur Verfügung stellen kann, unterscheiden sich nach Branche.",
+                "3. Je mehr Angaben ein GMB-Profil beinhaltet, umso teurer sind die Gebühren, die an Google zu zahlen sind.",
+                "4. Im GMB-Profil kann man aktuelle Informationen einspielen, die nur zeitlich begrenzt angezeigt werden.",
+                "5. Im GMB-Profil kann man selbstständig festlegen, wie groß das Einzugsgebiet des Unternehmens ist."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "35. Die Globetrader GmbH setzt unterschiedliche Werbemittel für die Kundengewinnung und Kundenbindung ein. Geben Sie an, welche Werbemaßnahme sich ausschließlich für die Kundenbindung eignet!",
+            type: "single",
+            options: [
+                "1. Newsletter",
+                "2. SEA",
+                "3. Guerilla Marketing",
+                "4. Bonusprogramme",
+                "5. Paketbeilagen"
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "36. Der Break-Even-Point ist ebenfalls eine wichtige Kennzahl für die Steuerungs- und Kontrollprozesse im Rechnungswesen. Prüfen Sie, welche Beschreibung dazu korrekt ist!",
+            type: "single",
+            options: [
+                "1. Der Break-Even-Point errechnet sich durch Abzug der variablen Kosten von den fixen Kosten.",
+                "2. Der Break-Even-Point gibt das Verhältnis der variablen Kosten zu den fixen Kosten an.",
+                "3. Der Break-Even-Point ist der Punkt, an dem die Leerkosten zu Nutzkosten werden.",
+                "4. Der Break-Even-Point spielt in Handelsunternehmen überhaupt keine Rolle.",
+                "5. Der Break-Even-Point gibt die Absatzmenge an, ab der alle Kosten durch die Umsatzerlöse gedeckt sind."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "37. Geben Sie an, welche Darstellung zum Customer Lifetime Value (CLV) richtig ist!",
+            type: "single",
+            options: [
+                "1. Der CLV ermittelt den Deckungsbeitrag, den der einzelne Kunde über alle Bestellungen einbringt.",
+                "2. Der CLV ist eine Kennzahl im Rahmen der Sortimentsgestaltung über die aktiven Saisons.",
+                "3. Der CLV errechnet sich auf Basis des Average Order Value (AOV) und der Brutto-Gewinnspanne.",
+                "4. Der CLV basiert in der Berechnung auf der Bounce-Rate (BR) über alle Werbemaßnahmen.",
+                "5. Der CLV wird nur in produzierenden Unternehmen ausgewertet."
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "38. Prüfen Sie, welcher Sachverhalt auf die Kostenträgerrechnung zutrifft.",
+            type: "single",
+            options: [
+                "1. Die Kostenträgerrechnung wird immer als Vollkostenrechnung betrieben.",
+                "2. Die Vollkostenrechnung umfasst die volle Kostenkontrolle im Unternehmen.",
+                "3. Die Kostenträgerrechnung kann als Voll- oder Teilkostenrechnung durchgeführt werden.",
+                "4. Die Deckungsbeitragsrechnung ist eine Form der Vollkostenrechnung.",
+                "5. Die Vollkostenrechnung unterscheidet die Kosten in fixe und variable Bestandteile."
+            ],
+            correctAnswer: [2]
+        }
+    ];
+
+    // Variablen für den Quizstatus
+    let remainingQuestions = [...questions]; // Kopie der Fragen
+    let currentQuestionIndex = null;
+    let correctAnswersCount = 0;
+    let totalQuestions = questions.length;
+
+    const questionContainer = document.getElementById('question-container');
+    const progressText = document.getElementById('current-question-number');
+    const totalQuestionsText = document.getElementById('total-questions');
+    const resultDiv = document.getElementById('result');
+    const restartButton = document.getElementById('restart');
+    const submitButton = document.getElementById('submit-answer');
+    const backButton = document.getElementById('back-button');
+
+    totalQuestionsText.textContent = totalQuestions;
+
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function loadNextQuestion() {
+        resultDiv.textContent = '';
+        submitButton.style.display = 'none';
+
+        if (remainingQuestions.length === 0) {
+            // Quiz beendet
+            questionContainer.innerHTML = "<h2>Quiz beendet!</h2><p>Sie haben " + correctAnswersCount + " von " + totalQuestions + " Fragen richtig beantwortet.</p>";
+            progressText.textContent = totalQuestions;
+            restartButton.style.display = 'block';
+            return;
+        }
+
+        // Nächste Frage laden
+        currentQuestionIndex = 0; // Fragen der Reihe nach
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        // Frage anzeigen
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `
+                        <li>
+                            <label>
+                                <input type="checkbox" name="option" value="${index}">
+                                ${option}
+                            </label>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = true;
+
+            // Event Listener für Checkboxen hinzufügen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Mindestens eine Option ausgewählt
+                    submitButton.disabled = !Array.from(optionInputs).some(i => i.checked);
+                });
+            });
+        } else if (currentQuestion.type === "single") {
+            // Single-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `<li><button data-index="${index}">${option}</button></li>`).join('')}
+                </ul>
+            `;
+            // Event Listener für Optionen hinzufügen
+            const optionButtons = document.querySelectorAll('.options button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', checkSingleAnswer);
+            });
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <div class="matching-container">
+                    <div class="matching-options">
+                        <strong>Optionen:</strong>
+                        <ul>
+                            ${currentQuestion.options.map(option => `<li>${option.number}. ${option.text}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="matching-items">
+                        <strong>Zuweisen:</strong>
+                        <ul>
+                            ${currentQuestion.items.map((item, index) => `
+                                <li class="matching-row">
+                                    <input type="text" maxlength="1" data-index="${index}">
+                                    <span>${item}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = false; // Kann abgeschickt werden
+        }
+
+        // Fortschritt aktualisieren
+        progressText.textContent = totalQuestions - remainingQuestions.length + 1;
+    }
+
+    function checkSingleAnswer(event) {
+        const selectedOption = parseInt(event.target.getAttribute('data-index'));
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (selectedOption === currentQuestion.correctAnswer[0]) {
+            // Richtige Antwort
+            event.target.classList.add('correct');
+            correctAnswersCount++;
+        } else {
+            // Falsche Antwort
+            event.target.classList.add('incorrect');
+        }
+
+        // Buttons deaktivieren
+        const optionButtons = document.querySelectorAll('.options button');
+        optionButtons.forEach(button => {
+            button.disabled = true;
+            const index = parseInt(button.getAttribute('data-index'));
+            if (currentQuestion.correctAnswer.includes(index)) {
+                button.classList.add('correct');
+            }
+        });
+
+        remainingQuestions.splice(currentQuestionIndex, 1);
+
+        // Kurz warten und nächste Frage laden
+        setTimeout(loadNextQuestion, 2000);
+    }
+
+    function checkMultipleAnswer() {
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage auswerten
+            const selectedOptions = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(input => parseInt(input.value));
+
+            // Antworten sortieren für Vergleich
+            selectedOptions.sort((a, b) => a - b);
+            const correctAnswers = [...currentQuestion.correctAnswer].sort((a, b) => a - b);
+
+            const isCorrect = JSON.stringify(selectedOptions) === JSON.stringify(correctAnswers);
+
+            if (isCorrect) {
+                // Richtige Antwort
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                // Falsche Antwort
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            // Richtig/Falsch anzeigen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.disabled = true;
+                const parentLabel = input.parentElement;
+                const optionIndex = parseInt(input.value);
+                if (currentQuestion.correctAnswer.includes(optionIndex)) {
+                    parentLabel.classList.add('correct');
+                } else if (input.checked) {
+                    parentLabel.classList.add('incorrect');
+                }
+            });
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 3000);
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage auswerten
+            const inputs = document.querySelectorAll('.matching-items input[type="text"]');
+            let allCorrect = true;
+
+            inputs.forEach(input => {
+                const index = parseInt(input.getAttribute('data-index'));
+                const userAnswer = input.value.trim();
+                const correctAnswer = currentQuestion.correctAnswers[index].toString();
+
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                }
+                input.disabled = true;
+            });
+
+            if (allCorrect) {
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 4000);
+        }
+    }
+
+    submitButton.addEventListener('click', checkMultipleAnswer);
+
+    restartButton.addEventListener('click', function() {
+        // Quiz zurücksetzen
+        remainingQuestions = [...questions];
+        correctAnswersCount = 0;
+        currentQuestionIndex = null;
+        restartButton.style.display = 'none';
+        resultDiv.textContent = '';
+        loadNextQuestion();
+    });
+
+    backButton.addEventListener('click', function() {
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Quiz starten
+    shuffle(remainingQuestions);
+    loadNextQuestion();
+</script>
+
+</body>
+</html>

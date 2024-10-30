@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Commerce Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .options, .matching-options, .matching-items {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li, .matching-items li {
+            margin-bottom: 10px;
+        }
+        .options li label {
+            display: block;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #progress {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #submit-answer {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        #restart, #back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+        .matching-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .matching-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .matching-row input[type="text"] {
+            width: 50px;
+            margin-right: 10px;
+        }
+        .matching-options {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>E-Commerce Quiz</h1>
+    <div id="question-container">
+        <!-- Die Frage wird hier eingefügt -->
+    </div>
+    <div id="progress">
+        Frage <span id="current-question-number">1</span> von <span id="total-questions">13</span>
+    </div>
+    <div id="result"></div>
+    <button id="submit-answer" style="display: none;">Antwort absenden</button>
+    <button id="restart" style="display: none;">Quiz neu starten</button>
+    <button id="back-button">Zurück</button>
+</div>
+
+<script>
+    // Neue Fragen mit verschiedenen Typen
+    const questions = [
+        {
+            question: "1. Sie unterbreiten den Vorschlag, die App mit Werbemaßnahmen in der kostenfreien Version zu subventionieren. Als Abrechnungsmethode sehen Sie das Verfahren Cost per Click (CPC). Welche Beschreibung trifft auf diese Abrechnungsmethode zu?",
+            type: "single",
+            options: [
+                "CPC ist keine Abrechnungsmethode im Online-Marketing, sondern bezieht sich auf die Klickrate innerhalb der App.",
+                "Je häufiger in der App geklickt wird, desto mehr muss an den Entwickler für die Nutzung gezahlt werden.",
+                "CPC ist eine Abrechnungsmethode im Online-Marketing, die nur bei Lastschriftverfahren eingesetzt wird.",
+                "CPC beschreibt eine Abrechnungsmethode im Online-Marketing, bei der pro Klick auf ein Werbemittel abgerechnet wird.",
+                "Durch CPC spart man sich Inkasso."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "2. Ein Teil der Sortimente der Globetrader GmbH wird bereits über Marktplätze vertrieben. Prüfen Sie, welcher Sachverhalt richtig beschrieben ist!",
+            type: "single",
+            options: [
+                "Ein Marktplatz ist ein anderer Ausdruck für einen Online-Shop, der nur einem Händler gehört.",
+                "Über Marktplätze werden online ausschließlich Dienstleistungen angeboten, für den Warenverkehr lohnt sich das nicht.",
+                "Ein Marktplatz stellt einen virtuellen Ort innerhalb eines übergeordneten Datennetzes dar, innerhalb dessen virtuelle Geschäftstransaktionen ausschließlich zwischen Marktplatzbetreiber und Marktplatzhändler durchgeführt werden.",
+                "Marktplätze unterscheiden sich von Online-Shops nicht, außer dass die Nutzer hier ausschließlich bar zahlen können.",
+                "Marktplätze vertreiben unter anderem Produkte und Waren von verschiedenen Händlern und verfolgen das Ziel, über Provisionen die Infrastruktur zu finanzieren."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "3. Für die Bewertung der verschiedenen Kanäle wird auch der durchschnittliche Warenkorb (Average Order Value) herangezogen. Prüfen Sie, welcher Sachverhalt darauf zutrifft!",
+            type: "single",
+            options: [
+                "Der durchschnittliche Warenkorbwert ist eine Kennzahl, die es ermöglicht, die Cost per Sale zu berechnen.",
+                "Mit dem durchschnittlichen Warenkorbwert ermittelt man die Kosten für die jeweilige Transaktion im Online-Shop.",
+                "Durchschnittliche Warenkorbwerte sind im Online-Handel nur bei Marktplätzen relevant.",
+                "Der durchschnittliche Warenkorbwert erhöht sich durch Up-Selling und verringert sich durch Cross-Selling.",
+                "Der durchschnittliche Warenkorb gibt an, mit welchem Bestellwert die Globetrader GmbH pro Kunde rechnen kann."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "4. Geben Sie an, um welche Art der Sortimentsentwicklung es sich bei der geplanten Ansprache von GalaBau-Betrieben handelt!",
+            type: "single",
+            options: [
+                "Sortimentserweiterung",
+                "Sortimentsdiversifikation",
+                "Sortimentsbereinigung",
+                "Sortimentselimination",
+                "Sortimentsdiffusion"
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "5. Nach erfolgreichem Test soll nun das Sortiment gezielt an Garten- und Landschaftsbaubetriebe über einen eigens eingerichteten B2B-Online-Shop angeboten werden. Prüfen Sie, welcher Sachverhalt dazu richtig beschrieben ist!",
+            type: "single",
+            options: [
+                "Gewerbliche Kunden kaufen grundsätzlich zu ihren eigenen AGB ein.",
+                "Die im Onlineshop gezeigten Preise stellen gegenüber gewerblichen Kunden ein bindendes Angebot dar.",
+                "Gewerblichen Kunden werden in der Regel die Netto-Preise angezeigt.",
+                "Gewerbliche Kunden, die in einem B2B-Onlineshop einkaufen, sind gegenüber dem Endverbraucher im Nachteil.",
+                "Gewerbliche Kunden fordern mit dem Klick auf den Bestellbutton ein Angebot an."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "6. Beim Online-Marketing ist auch die Platzierung von Anzeigen wie Bannern oder Native Advertising von großer Bedeutung für die Förderung des Bekanntheitsgrades der Globetrader GmbH. Welchen Aspekt müssen Sie bei der Platzierung solcher Formate besonders beachten?",
+            type: "single",
+            options: [
+                "Opt-In-Erklärung der Kunden bei der Rechnungsbuchung",
+                "Erforderliche technische Vorgaben für z. B. die Platzierung von Text und Bild",
+                "Druckauflage der Werbepartner",
+                "Kunden-Adresslisten mit Doppelungen für eine möglichst breite Streuung",
+                "Gestaltung der Landingpages möglichst ohne Text"
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "7. Mit dem Return On Advertising Spend ermittelt die Globetrader GmbH die Rentabilität von Werbeausgaben. Die Globetrader GmbH gibt 1.000,00 € im Monat für Social-Media-Marketing aus und erzielt damit einen Umsatz von 10.000,00 €. Dies ergibt einen Return On Advertising Spend von 10,00 €. Prüfen Sie, welche Interpretation dazu korrekt ist!",
+            type: "single",
+            options: [
+                "Das Social-Media-Marketing finanziert sich komplett selbst.",
+                "Der Return On Advertising Spend von 10,00 € wird als Spende verbucht.",
+                "Der Umsatz von 10.000,00 € muss zur Hälfte wieder in Werbemaßnahmen investiert werden.",
+                "Für jeden €, der in Social-Marketing investiert wurde, erhält die Globetrader GmbH den 10-fachen Gewinn.",
+                "Für jeden €, der für Social-Media-Marketing investiert wurde, wird ein Umsatz von 10,00 € erzielt."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "8. Influencer berechnen ihre Dienstleistung in der Regel auf Basis ihrer aktiven Follower. Prüfen Sie, welche 2 Risiken in diesem Zusammenhang für die Globetrader GmbH bestehen!",
+            type: "multiple",
+            options: [
+                "Bei ungenauer Mediadatenanalyse kann die Globetrader GmbH zu keiner korrekten Einschätzung der von den Influencern gestellten Rechnungen gelangen.",
+                "Influencer können Fake-Follower besitzen, welche nicht den Unternehmenszielen dienlich sind.",
+                "Sämtliche denkbaren, auch fachfremde Zielgruppen werden angesprochen, können aber nicht bedient werden.",
+                "Die beworbenen Artikel müssen trotz Personalkostensteigerung zu Dumpingpreisen veräußert werden.",
+                "Die Globetrader GmbH kann die Dienstleistungen buchhalterisch nicht ordnungsgemäß abrechnen.",
+                "Es kommt für die Globetrader GmbH in jedem Fall zu einer extrem hohen Kostensteigerung im Personalbereich."
+            ],
+            correctAnswer: [0, 1]
+        },
+        {
+            question: "9. Weiterhin sind Influencer auf Plattformen angewiesen, auf denen sie ihre Follower erreichen können. Prüfen Sie, auf welchen 2 Plattformen Influencer die Zielgruppen der Globetrader GmbH im B2C-Bereich nicht ansprechen können, da diese Plattformen dazu ungeeignet sind!",
+            type: "multiple",
+            options: [
+                "Facebook",
+                "TikTok",
+                "LinkedIn (Business Plattformen)",
+                "Pinterest",
+                "Blogs",
+                "Xing (Business Plattformen)"
+            ],
+            correctAnswer: [2, 5]
+        },
+        {
+            question: "10. Abschließend betrachtet kann Influencer-Marketing gegenüber anderen Marketingmaßnahmen für die Globetrader GmbH auch verschiedene Vorteile besitzen. Stellen Sie fest, in welchen 2 Fällen solche Vorteile gegeben sind!",
+            type: "multiple",
+            options: [
+                "Garantiert überdurchschnittliche Umsatzsteigerung",
+                "Hohe Reichweite",
+                "Allgemeine Ansprache vieler, breit gefächerter Zielgruppen",
+                "Extrem hohe Generierung aller möglichen Zielgruppen",
+                "Zielgenaue Ansprache spezieller Zielgruppen",
+                "Garantierte Werbeplatzierung vor allem im öffentlichen Fernsehen"
+            ],
+            correctAnswer: [1, 4]
+        },
+        {
+            question: "11. Prüfen Sie, welche Beschreibung für den genannten neuen Online-Vertriebskanal (Liveshopping per Streaming über Social Media) zutrifft!",
+            type: "single",
+            options: [
+                "Live-Shopping per Streaming via Social Media wird nicht als Rundfunk, sondern als Mediendienst eingestuft und im Mediendienste-Staatsvertrag reguliert.",
+                "Live-Shopping wird im Studio vor Publikum aufgezeichnet und danach zum Download über Social Media-Portale bereitgestellt.",
+                "Live-Shopping eignet sich nur für wenig erklärungsbedürftige Basic-Produkte, da der Hauptzweck der Abverkauf großer Mengen ist.",
+                "Beim Live-Shopping sind die Exklusivität des Angebots und das verkäuferische Geschick der Präsentatoren Erfolgsfaktoren.",
+                "Live-Shopping benötigt keine besondere Vorbereitung in Logistik und Einkauf, da bei erschöpftem Bestand der Präsentator einfach ein anderes Produkt vorstellen kann."
+            ],
+            correctAnswer: [3]
+        },
+        // Neue Matching-Fragen
+        {
+            question: "12. In der Kostenrechnung werden Fixkosten und variable Kosten unterschieden. Ordnen Sie zu, indem Sie die Kennziffern der 2 Kostenarten in die Kästchen neben den Beschreibungen eintragen!\n\n1. Fixkosten\n2. Variable Kosten",
+            type: "matching",
+            options: [
+                {number: "1", text: "Fixkosten"},
+                {number: "2", text: "Variable Kosten"}
+            ],
+            items: [
+                "Für das Serversystem auf dem Blog von der GmbH erhebt der Shop-Hoster eine monatliche Servicepauschale an.",
+                "Für die Aufnahme neuer Produkte im ERP- und Shop-System beschäftigt die Globetrader GmbH Aushilfen auf Stundenlohnbasis.",
+                "Für die Ladenfläche der Filiale Globetrader GmbH werden monatliche Mieten/Pachten fällig.",
+                "Für den Expressversand einzelner Lieferungen an Kunden der Globetrader GmbH werden Kurierdienstleister eingesetzt."
+            ],
+            correctAnswers: [1,2,1,2]
+        },
+        {
+            question: "13. Mit dem Begriff Werbung beschreibt die Globetrader GmbH die Summe aller Aktivitäten, die von ihr durchgeführt werden, um ihrer Zielgruppe Informationen zu einem Produkt bzw. einer Dienstleistung zukommen zu lassen. Ordnen Sie zu, indem Sie die Kennziffern der 6 Begriffe in die Kästchen neben den 6 zugehörigen Bedeutungen eintragen!\n\nBegriffe\n1. Streukreis\n2. Werbeträger/-medien\n3. Werbebotschaft\n4. Streugebiet\n5. Streuzeit\n6. Werbeetat",
+            type: "matching",
+            options: [
+                {number: "1", text: "Streukreis"},
+                {number: "2", text: "Werbeträger/-medien"},
+                {number: "3", text: "Werbebotschaft"},
+                {number: "4", text: "Streugebiet"},
+                {number: "5", text: "Streuzeit"},
+                {number: "6", text: "Werbeetat"}
+            ],
+            items: [
+                "Mit welchen Medien wird geworben?",
+                "Wer soll erreicht werden?",
+                "Wie viel Geld steht zur Verfügung?",
+                "Welche Nachricht soll vermittelt werden?",
+                "Wo soll geworben werden?",
+                "Wann soll geworben werden?"
+            ],
+            correctAnswers: [2,1,6,3,4,5]
+        }
+    ];
+
+    // Variablen für den Quizstatus
+    let remainingQuestions = [...questions]; // Kopie der Fragen
+    let currentQuestionIndex = null;
+    let correctAnswersCount = 0;
+    let totalQuestions = questions.length;
+
+    const questionContainer = document.getElementById('question-container');
+    const progressText = document.getElementById('current-question-number');
+    const totalQuestionsText = document.getElementById('total-questions');
+    const resultDiv = document.getElementById('result');
+    const restartButton = document.getElementById('restart');
+    const submitButton = document.getElementById('submit-answer');
+    const backButton = document.getElementById('back-button');
+
+    totalQuestionsText.textContent = totalQuestions;
+
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function loadNextQuestion() {
+        resultDiv.textContent = '';
+        submitButton.style.display = 'none';
+
+        if (remainingQuestions.length === 0) {
+            // Quiz beendet
+            questionContainer.innerHTML = "<h2>Quiz beendet!</h2><p>Sie haben " + correctAnswersCount + " von " + totalQuestions + " Fragen richtig beantwortet.</p>";
+            progressText.textContent = totalQuestions;
+            restartButton.style.display = 'block';
+            return;
+        }
+
+        // Nächste Frage laden
+        currentQuestionIndex = 0; // Fragen der Reihe nach
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        // Frage anzeigen
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `
+                        <li>
+                            <label>
+                                <input type="checkbox" name="option" value="${index}">
+                                ${option}
+                            </label>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = true;
+
+            // Event Listener für Checkboxen hinzufügen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Mindestens eine Option ausgewählt
+                    submitButton.disabled = !Array.from(optionInputs).some(i => i.checked);
+                });
+            });
+        } else if (currentQuestion.type === "single") {
+            // Single-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `<li><button data-index="${index}">${option}</button></li>`).join('')}
+                </ul>
+            `;
+            // Event Listener für Optionen hinzufügen
+            const optionButtons = document.querySelectorAll('.options button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', checkSingleAnswer);
+            });
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <div class="matching-container">
+                    <div class="matching-options">
+                        <strong>Optionen:</strong>
+                        <ul>
+                            ${currentQuestion.options.map(option => `<li>${option.number}. ${option.text}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="matching-items">
+                        <strong>Zuweisen:</strong>
+                        <ul>
+                            ${currentQuestion.items.map((item, index) => `
+                                <li class="matching-row">
+                                    <input type="text" maxlength="1" data-index="${index}">
+                                    <span>${item}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = false; // Kann abgeschickt werden
+        }
+
+        // Fortschritt aktualisieren
+        progressText.textContent = totalQuestions - remainingQuestions.length + 1;
+    }
+
+    function checkSingleAnswer(event) {
+        const selectedOption = parseInt(event.target.getAttribute('data-index'));
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (selectedOption === currentQuestion.correctAnswer[0]) {
+            // Richtige Antwort
+            event.target.classList.add('correct');
+            correctAnswersCount++;
+        } else {
+            // Falsche Antwort
+            event.target.classList.add('incorrect');
+        }
+
+        // Buttons deaktivieren
+        const optionButtons = document.querySelectorAll('.options button');
+        optionButtons.forEach(button => {
+            button.disabled = true;
+            const index = parseInt(button.getAttribute('data-index'));
+            if (index === currentQuestion.correctAnswer[0]) {
+                button.classList.add('correct');
+            }
+        });
+
+        remainingQuestions.splice(currentQuestionIndex, 1);
+
+        // Kurz warten und nächste Frage laden
+        setTimeout(loadNextQuestion, 2000);
+    }
+
+    function checkMultipleAnswer() {
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage auswerten
+            const selectedOptions = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(input => parseInt(input.value));
+
+            // Antworten sortieren für Vergleich
+            selectedOptions.sort((a, b) => a - b);
+            const correctAnswers = [...currentQuestion.correctAnswer].sort((a, b) => a - b);
+
+            const isCorrect = JSON.stringify(selectedOptions) === JSON.stringify(correctAnswers);
+
+            if (isCorrect) {
+                // Richtige Antwort
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                // Falsche Antwort
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            // Richtig/Falsch anzeigen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.disabled = true;
+                const parentLabel = input.parentElement;
+                const optionIndex = parseInt(input.value);
+                if (currentQuestion.correctAnswer.includes(optionIndex)) {
+                    parentLabel.classList.add('correct');
+                } else if (input.checked) {
+                    parentLabel.classList.add('incorrect');
+                }
+            });
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 3000);
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage auswerten
+            const inputs = document.querySelectorAll('.matching-items input[type="text"]');
+            let allCorrect = true;
+
+            inputs.forEach(input => {
+                const index = parseInt(input.getAttribute('data-index'));
+                const userAnswer = input.value.trim();
+                const correctAnswer = currentQuestion.correctAnswers[index].toString();
+
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                }
+                input.disabled = true;
+            });
+
+            if (allCorrect) {
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 4000);
+        }
+    }
+
+    submitButton.addEventListener('click', checkMultipleAnswer);
+
+    restartButton.addEventListener('click', function() {
+        // Quiz zurücksetzen
+        remainingQuestions = [...questions];
+        correctAnswersCount = 0;
+        currentQuestionIndex = null;
+        restartButton.style.display = 'none';
+        resultDiv.textContent = '';
+        loadNextQuestion();
+    });
+
+    backButton.addEventListener('click', function() {
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Quiz starten
+    shuffle(remainingQuestions);
+    loadNextQuestion();
+</script>
+
+</body>
+</html>

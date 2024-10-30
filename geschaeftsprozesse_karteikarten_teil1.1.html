@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Karteikartenprogramm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            position: relative; /* Für die Positionierung des Counters */
+            background-color: #f5f5f5;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        #back-button {
+            position: absolute;
+            left: 0;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        #back-button:hover {
+            background-color: #0056b3;
+        }
+        #card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            text-align: left;
+            font-size: 1.1em;
+            line-height: 1.5em;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #card-content {
+            cursor: pointer;
+            white-space: pre-line; /* Ermöglicht Zeilenumbrüche bei \n */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #buttons button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            border: none;
+            color: #fff;
+        }
+        #know-button {
+            background-color: #28a745;
+        }
+        #know-button:hover {
+            background-color: #218838;
+        }
+        #dont-know-button {
+            background-color: #dc3545;
+        }
+        #dont-know-button:hover {
+            background-color: #c82333;
+        }
+        /* Stil für den verbleibenden Karten-Counter */
+        #counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            z-index: 1000; /* Sicherstellen, dass der Counter oben bleibt */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button id="back-button">Zurück</button>
+    <h1>Karteikartenprogramm</h1>
+</header>
+
+<div id="card">
+    <div id="card-content">Klicken Sie hier, um die erste Frage anzuzeigen.</div>
+    <div id="buttons" style="display: none;">
+        <button id="dont-know-button">✗ Ich wusste es nicht</button>
+        <button id="know-button">✓ Ich wusste es</button>
+    </div>
+</div>
+
+<!-- Anzeige für verbleibende Karteikarten -->
+<div id="counter">Verbleibende Karten: <span id="remaining-count">0</span></div>
+
+<script>
+    // Fragen und Antworten
+   const cards = [
+    {
+            question: "1. Was versteht man unter E-Commerce und welche Bedeutung hat er im modernen Handel?",
+            answer: "E-Commerce (Electronic Commerce) bezeichnet den elektronischen Handel von Waren und Dienstleistungen über das Internet. Er umfasst alle Aktivitäten von der Produktpräsentation über den Verkaufsabschluss bis hin zur Zahlungsabwicklung und Logistik. Im modernen Handel ermöglicht E-Commerce Unternehmen einen globalen Marktzugang, 24/7-Verfügbarkeit, Kosteneffizienz durch reduzierte Betriebskosten und datenbasierte Entscheidungen zur Optimierung von Angeboten."
+        },
+        { 
+            question: "2. Welche aktuellen Marktentwicklungen prägen den E-Commerce derzeit?",
+            answer: "Aktuelle Marktentwicklungen im E-Commerce umfassen das stetige Wachstum des Online-Handels, die Zunahme von Mobile Commerce (M-Commerce) durch vermehrte Nutzung mobiler Endgeräte, die Implementierung von Omnichannel-Strategien für ein nahtloses Kundenerlebnis über verschiedene Kanäle und den verstärkten Einsatz von Personalisierungstechnologien zur individuellen Ansprache von Kunden."
+        },
+        {
+            question: "3. Welche Vorteile bietet ein eigener Online-Shop gegenüber anderen Vertriebskanälen?",
+            answer: "Ein eigener Online-Shop bietet Vorteile wie volle Markenkontrolle über Design, Funktionen und Kundenkommunikation, Datenhoheit mit Zugriff auf alle Kundendaten für Marketing und Analyse, und die Möglichkeit zu individuellen Anpassungen und Implementierungen von Funktionen und Services, die auf die spezifischen Bedürfnisse des Unternehmens zugeschnitten sind."
+        },
+        {
+            question: "4. Welche Herausforderungen sind mit dem Betrieb eines eigenen Online-Shops verbunden?",
+            answer: "Herausforderungen beim Betrieb eines eigenen Online-Shops umfassen den hohen Marketingaufwand, um Besucher auf die eigene Seite zu lenken, technische Anforderungen an die IT-Infrastruktur und Sicherheit, sowie die Kosten für Entwicklung, Hosting und kontinuierliche Wartung des Shops."
+        },
+        {
+            question: "5. Was sind Online-Marktplätze und welche Beispiele gibt es dafür?",
+            answer: "Online-Marktplätze sind Plattformen, auf denen mehrere Anbieter ihre Produkte einem großen Kundenstamm anbieten. Beispiele für Online-Marktplätze sind Amazon, der weltweit größte Online-Marktplatz, eBay als Auktions- und Festpreisplattform, und Etsy, das sich auf handgemachte und Vintage-Produkte spezialisiert hat."
+        },
+        {
+            question: "6. Nennen Sie Vor- und Nachteile der Nutzung von Online-Marktplätzen als Vertriebskanal.",
+            answer: "Vorteile:\n- Hohe Reichweite durch Zugang zu Millionen potenzieller Kunden.\n- Nutzung bestehender Infrastruktur für Logistik und Zahlungsabwicklung.\n- Vertrauen der Kunden in etablierte Plattformen.\n\nNachteile:\n- Gebühren durch Verkaufsprovisionen und zusätzliche Kosten.\n- Hohe Konkurrenz und Preisdruck durch viele Anbieter.\n- Abhängigkeit von Plattformrichtlinien und eingeschränkte Kontrolle über Markenpräsentation."
+        },
+        {
+            question: "7. Wie können Social-Media-Plattformen als Vertriebskanal genutzt werden?",
+            answer: "Social-Media-Plattformen können als Vertriebskanal genutzt werden, indem Unternehmen Funktionen wie Facebook Shops, Instagram Shopping oder Pinterest Buyable Pins einsetzen, um Produkte direkt über soziale Netzwerke zu verkaufen. Zudem ermöglichen soziale Medien die direkte Kundeninteraktion, gezieltes Marketing durch Nutzerdaten und die Nutzung von Viralitätspotenzial für die Verbreitung von Inhalten."
+        },
+        {
+            question: "8. Welche Vorteile bieten Social-Media-Plattformen im E-Commerce?",
+            answer: "Vorteile von Social-Media-Plattformen im E-Commerce sind die direkte Kundeninteraktion und Engagement in Echtzeit, das Potenzial für virale Verbreitung von Inhalten, präzises Targeting durch umfangreiche Nutzerdaten und die Möglichkeit, eine starke Markenpräsenz aufzubauen."
+        },
+        {
+            question: "9. Welche Herausforderungen sind mit dem Verkauf über Social-Media-Plattformen verbunden?",
+            answer: "Herausforderungen umfassen die Abhängigkeit von Plattformalgorithmen, die die Reichweite beeinflussen können, Datenschutzaspekte und die Einhaltung der DSGVO, sowie mögliche Einschränkungen bei der Kaufabwicklung, da Kunden oft auf externe Shops weitergeleitet werden müssen."
+        },
+        {
+            question: "10. Was sind Suchmaschinen und Preisvergleichsportale und wie können sie im Vertrieb eingesetzt werden?",
+            answer: "Suchmaschinen und Preisvergleichsportale sind Plattformen, auf denen Kunden Produkte suchen und Preise vergleichen können. Sie können im Vertrieb eingesetzt werden, indem Unternehmen ihre Produkte dort listen oder Werbung schalten, um Kunden zu erreichen, die aktiv nach bestimmten Produkten suchen. Beispiele sind Google Shopping und Idealo."
+        },
+        {
+            question: "11. Welche Vorteile und Herausforderungen bieten Suchmaschinen und Preisvergleichsportale?",
+            answer: "Vorteile:\n- Hohe Kaufbereitschaft der Nutzer, die aktiv nach Produkten suchen.\n- Transparenz durch klare Darstellung von Preis und Leistung.\n- Steigerung der Besucherzahlen im eigenen Shop durch Traffic-Generierung.\n\nHerausforderungen:\n- Kosten für bezahlte Listungen und Klickpreise.\n- Hoher Preisdruck durch direkte Vergleichbarkeit der Angebote.\n- Fokus der Kunden auf den Preis, was die Markenwahrnehmung beeinflussen kann."
+        },
+        {
+            question: "12. Welche Rolle spielen mobile Apps im E-Commerce und welche Vorteile bieten sie?",
+            answer: "Mobile Apps ermöglichen Unternehmen, spezifische Anwendungen für Smartphones und Tablets anzubieten, über die Kunden Produkte kaufen können. Vorteile sind Personalisierung durch individuelle Angebote basierend auf Nutzerverhalten, optimierte Benutzerfreundlichkeit für mobile Geräte und direkte Kommunikation mit dem Nutzer über Push-Benachrichtigungen."
+        },
+        {
+            question: "13. Welche Kriterien sind bei der Auswahl von Online-Vertriebskanälen zu berücksichtigen?",
+            answer: "Bei der Auswahl von Online-Vertriebskanälen sollten Kriterien wie die Zielgruppenanalyse, Produktspezifika, Wettbewerbssituation, Unternehmensressourcen und Kompetenzen sowie eine Wirtschaftlichkeitsanalyse (ROI) berücksichtigt werden. Dies hilft, Kanäle zu wählen, die am besten zu den Unternehmenszielen und -möglichkeiten passen."
+        },
+        {
+            question: "14. Was versteht man unter Zielgruppenanalyse und welche Methoden werden dabei angewendet?",
+            answer: "Zielgruppenanalyse ist die systematische Untersuchung der potenziellen Kunden, um deren Bedürfnisse, Verhaltensweisen und Präferenzen zu verstehen. Methoden umfassen die Erhebung von demografischen Daten (Alter, Geschlecht, Einkommen), psychografischen Merkmalen (Interessen, Werte, Lebensstil) und Verhaltensdaten (Kaufverhalten, Mediennutzung). Die Erstellung von Buyer Personas hilft, typische Kunden zu repräsentieren."
+        },
+        {
+            question: "15. Wie beeinflussen Produktspezifika die Wahl des Vertriebskanals?",
+            answer: "Produktspezifika wie Produktart (physische Güter, digitale Produkte, Dienstleistungen), Preisniveau und Erklärungsbedürftigkeit beeinflussen die Wahl des Vertriebskanals. Beispielsweise eignen sich komplexe, erklärungsbedürftige Produkte besser für den eigenen Shop mit ausführlichen Informationen, während niedrigpreisige oder Impulskaufprodukte gut über Marktplätze oder Social Media vertrieben werden können."
+        },
+        {
+            question: "16. Warum ist die Analyse der Wettbewerbssituation wichtig bei der Kanalwahl?",
+            answer: "Die Analyse der Wettbewerbssituation hilft, die Marktteilnehmer und deren genutzte Vertriebskanäle zu identifizieren, um strategische Entscheidungen zu treffen. Durch das Verständnis der Konkurrenz kann ein Unternehmen entscheiden, ob es sich differenzieren möchte, beispielsweise durch Nischenbesetzung oder einen Multichannel-Ansatz, um Wettbewerbsvorteile zu erzielen."
+        },
+        {
+            question: "17. Wie können Unternehmensressourcen und Kompetenzen die Auswahl von Vertriebskanälen beeinflussen?",
+            answer: "Unternehmensressourcen wie Personal, finanzielle Mittel und technisches Know-how beeinflussen, welche Vertriebskanäle ein Unternehmen effektiv nutzen kann. Wenn interne Ressourcen begrenzt sind, kann Outsourcing an Dienstleister oder die Nutzung von SaaS-Plattformen eine Option sein. Die Wahl der Kanäle sollte an die verfügbaren Ressourcen und Kompetenzen angepasst sein."
+        },
+        {
+            question: "18. Was ist der Return on Investment (ROI) und wie wird er berechnet?",
+            answer: "Der Return on Investment (ROI) ist eine Kennzahl zur Bewertung der Rentabilität einer Investition. Er wird berechnet mit der Formel:\n\nROI = ((Gewinn - Investition) / Investition) x 100\n\nDabei wird der Gewinn, abzüglich der Investitionskosten, ins Verhältnis zu den Investitionskosten gesetzt und in Prozent ausgedrückt. Ein höherer ROI bedeutet eine höhere Rentabilität der Investition."
+        },
+        {
+            question: "19. Welche strategischen Ziele werden beim Einsatz von Vertriebskanälen verfolgt?",
+            answer: "Strategische Ziele beim Einsatz von Vertriebskanälen umfassen die Reichweitensteigerung, Umsatzsteigerung durch Cross-Selling und Upselling, Verbesserung der Kundenbindung und Loyalität sowie die Markenpositionierung und Imagepflege. Diese Ziele helfen Unternehmen, ihre Marktpräsenz zu erhöhen, mehr Umsatz zu generieren und eine starke Marke aufzubauen."
+        },
+        {
+            question: "20. Was versteht man unter Cross-Selling und Upselling und wie können diese Strategien umgesetzt werden?",
+            answer: "Cross-Selling ist der Verkauf ergänzender Produkte oder Dienstleistungen zum Hauptprodukt. Umsetzung erfolgt durch Produktempfehlungen, Bundles oder Pakete. Beispiel: Beim Kauf eines Laptops wird eine Laptop-Tasche angeboten.\n\nUpselling ist der Verkauf einer höherwertigen oder teureren Produktvariante. Umsetzung durch Empfehlungen von Premium-Modellen oder Zusatzleistungen. Beispiel: Anbieten eines Laptops mit besseren Spezifikationen als ursprünglich gewählt."
+        },
+        {
+            question: "21. Wie kann die Kundenbindung und Loyalität durch den Einsatz von Vertriebskanälen gesteigert werden?",
+            answer: "Die Kundenbindung und Loyalität kann gesteigert werden durch:\n\n- Treueprogramme: Bonuspunkte, Rabatte oder exklusive Angebote für Stammkunden.\n- Personalisierte Kommunikation: Individuelle Ansprache und Angebote basierend auf Kundenpräferenzen.\n- Exzellenten Kundenservice: Schnelle Reaktionszeiten und kulante Lösungen bei Problemen.\n- Multichannel-Präsenz: Kunden können über ihren bevorzugten Kanal interagieren, was die Zufriedenheit erhöht."
+        },
+        {
+            question: "22. Welche Maßnahmen dienen der Markenpositionierung und Imagepflege im E-Commerce?",
+            answer: "Maßnahmen zur Markenpositionierung und Imagepflege umfassen:\n\n- Einheitliches Erscheinungsbild: Konsistente Nutzung von Logos, Farben und Design über alle Kanäle.\n- Storytelling: Vermittlung von Markenwerten und -geschichten, um emotionale Bindungen zu schaffen.\n- Qualitätsversprechen: Garantie hoher Produkt- und Servicequalität zur Stärkung des Vertrauens.\n- Aktive Kommunikation: Engagement in sozialen Medien und direkter Dialog mit Kunden."
+        },
+        {
+            question: "23. Welche technischen Kriterien sind bei der Auswahl von Plattformen und Technologien zu beachten?",
+            answer: "Technische Kriterien umfassen:\n\n- Skalierbarkeit: Die Plattform sollte mit dem Unternehmenswachstum mithalten können.\n- Benutzerfreundlichkeit: Intuitive Bedienung für Kunden und Mitarbeiter.\n- Integrationsfähigkeit: Möglichkeit, mit anderen Systemen (z. B. ERP, CRM) zu kommunizieren.\n- Sicherheit: Schutz von Daten und Transaktionen durch aktuelle Sicherheitsstandards.\n- Anpassungsfähigkeit: Flexibilität, um individuelle Anforderungen umzusetzen."
+        },
+        {
+            question: "24. Was sind ERP- und CRM-Systeme und welche Vorteile bieten sie im E-Commerce?",
+            answer: "ERP-Systeme (Enterprise Resource Planning): Software zur Verwaltung von Geschäftsprozessen wie Finanzen, Logistik und Personal. Vorteile sind zentralisierte Datenverwaltung, Prozessoptimierung und Effizienzsteigerung.\n\nCRM-Systeme (Customer Relationship Management): Systeme zur Verwaltung von Kundenbeziehungen und -interaktionen. Vorteile sind verbesserte Kundenbetreuung, gezieltes Marketing und langfristige Kundenbindung."
+        },
+        {
+            question: "25. Welche Optionen gibt es für Logistik und Fulfillment im Online-Handel?",
+            answer: "Optionen:\n\n- Eigene Logistik: Unternehmen verwalten Lagerung, Verpackung und Versand selbst.\n- Fulfillment-Dienstleister: Externe Anbieter übernehmen Logistikprozesse.\n- Dropshipping: Produkte werden direkt vom Lieferanten an den Kunden versendet.\n- Hybridmodelle: Kombination aus eigener Logistik und Dienstleistern, je nach Bedarf."
+        },
+        {
+            question: "26. Warum ist die Zahlungsabwicklung und Sicherheit ein kritischer Aspekt im E-Commerce?",
+            answer: "Zahlungsabwicklung und Sicherheit sind kritisch, weil sie das Vertrauen der Kunden beeinflussen. Sichere und zuverlässige Zahlungsoptionen erhöhen die Kaufbereitschaft. Sicherheitsstandards wie SSL-Verschlüsselung und PCI-DSS-Konformität schützen sensible Daten vor Missbrauch und sind für die Einhaltung gesetzlicher Vorgaben notwendig."
+        },
+        {
+            question: "27. Was ist Suchmaschinenoptimierung (SEO) und welche Maßnahmen umfasst sie?",
+            answer: "SEO ist die Optimierung einer Website, um ihre Sichtbarkeit in den organischen Suchergebnissen von Suchmaschinen zu verbessern. Maßnahmen umfassen:\n\n- Keyword-Optimierung: Verwendung relevanter Suchbegriffe in Inhalten.\n- On-Page-Optimierung: Verbesserung von Meta-Tags, Überschriften und interner Verlinkung.\n- Technisches SEO: Optimierung der Website-Struktur, Ladezeiten und Mobilfreundlichkeit.\n- Backlink-Aufbau: Generierung von qualitativ hochwertigen Links von anderen Websites."
+        },
+        {
+            question: "28. Was ist Suchmaschinenwerbung (SEA) und wie unterscheidet sie sich von SEO?",
+            answer: "SEA ist die Schaltung bezahlter Werbeanzeigen in Suchmaschinen, um sofortige Sichtbarkeit zu erreichen. Im Gegensatz zu SEO, das auf langfristige organische Rankings abzielt, ermöglicht SEA durch Budgeteinsatz eine schnelle Platzierung von Anzeigen oberhalb oder neben den organischen Suchergebnissen. SEA nutzt Modelle wie Cost per Click (CPC) und basiert auf Auktionsverfahren für Keywords."
+        },
+        {
+            question: "29. Wie kann Social Media Marketing zur Steigerung des Erfolgs im E-Commerce beitragen?",
+            answer: "Social Media Marketing kann beitragen durch:\n\n- Erhöhung der Markenbekanntheit: Reichweite und Sichtbarkeit in sozialen Netzwerken.\n- Kundeninteraktion: Aufbau von Beziehungen und Engagement mit der Zielgruppe.\n- Gezieltes Targeting: Ansprache spezifischer Zielgruppen basierend auf demografischen und verhaltensbezogenen Daten.\n- Content-Verbreitung: Teilen von Inhalten, die den Traffic auf die Website steigern."
+        },
+        {
+            question: "30. Welche Ziele verfolgt das E-Mail-Marketing und welche Maßnahmen sind dabei üblich?",
+            answer: "Ziele des E-Mail-Marketings sind Kundenbindung, Förderung von Wiederholungskäufen und Aufbau von Kundenbeziehungen. Übliche Maßnahmen sind:\n\n- Newsletter: Regelmäßige Versendung von Updates zu Produkten und Angeboten.\n- Personalisierte E-Mails: Anpassung von Inhalten basierend auf Kundenpräferenzen und -verhalten.\n- Automatisierte Kampagnen: Trigger-basierte E-Mails, z. B. bei Warenkorbabbrüchen oder Geburtstagen.\n- Transaktionsmails: Bestellbestätigungen und Versandbenachrichtigungen."
+        },
+        {
+            question: "31. Was versteht man unter Content Marketing und welche Formate werden genutzt?",
+            answer: "Content Marketing ist die Erstellung und Verbreitung von wertvollen, relevanten Inhalten, um eine klar definierte Zielgruppe anzuziehen und zu binden. Formate umfassen:\n\n- Blogartikel: Informative Texte zu relevanten Themen.\n- Videos: Produktpräsentationen, Tutorials, Unternehmensvorstellungen.\n- Webinare: Live-Präsentationen oder Schulungen.\n- E-Books und Whitepapers: Detaillierte Informationen zu spezifischen Themen."
+        },
+        {
+            question: "32. Welche rechtlichen Rahmenbedingungen sind im E-Commerce zu beachten?",
+            answer: "Rechtliche Rahmenbedingungen umfassen:\n\n- Datenschutz-Grundverordnung (DSGVO): Schutz personenbezogener Daten.\n- Fernabsatzrecht und Widerrufsrecht: Verbraucherrechte bei Online-Käufen.\n- Impressumspflicht: Gesetzliche Angaben auf der Website.\n- Informationspflichten: Klare Darstellung von Produktdetails, Preisen und Bedingungen.\n- Steuerliche Vorschriften: Umsatzsteuerregelungen, insbesondere bei grenzüberschreitendem Handel."
+        },
+        {
+            question: "33. Was sind die Grundprinzipien der Datenschutz-Grundverordnung (DSGVO)?",
+            answer: "Grundprinzipien der DSGVO sind:\n\n- Rechtmäßigkeit und Transparenz: Datenverarbeitung muss legal und für die betroffene Person nachvollziehbar sein.\n- Zweckbindung: Daten dürfen nur für festgelegte Zwecke erhoben werden.\n- Datenminimierung: Verarbeitung nur der notwendigen Daten.\n- Richtigkeit: Daten müssen korrekt und aktuell sein.\n- Speicherbegrenzung: Daten dürfen nicht länger als nötig gespeichert werden.\n- Integrität und Vertraulichkeit: Schutz der Daten vor unbefugtem Zugriff und Verarbeitung."
+        },
+        {
+            question: "34. Welche Pflichten ergeben sich für Unternehmen aus der DSGVO?",
+            answer: "Unternehmen müssen:\n\n- Einwilligungen einholen: Vor der Verarbeitung personenbezogener Daten.\n- Transparenz gewährleisten: Betroffene Personen über die Datenverarbeitung informieren.\n- Datenschutzbeauftragten bestellen: Bei umfangreicher Datenverarbeitung.\n- Datenschutzverletzungen melden: Innerhalb von 72 Stunden an die Aufsichtsbehörde.\n- Rechte der Betroffenen beachten: Auskunft, Berichtigung, Löschung und Widerspruch."
+        },
+        {
+            question: "35. Was regelt das Fernabsatzrecht und welche Informationspflichten bestehen?",
+            answer: "Das Fernabsatzrecht regelt Verträge zwischen Unternehmern und Verbrauchern, die über Fernkommunikationsmittel abgeschlossen werden. Informationspflichten umfassen:\n\n- Produktbeschreibung: Wesentliche Merkmale der Waren oder Dienstleistungen.\n- Preisangaben: Gesamtpreis inkl. Steuern und ggf. Versandkosten.\n- Lieferbedingungen: Lieferzeiten und -modalitäten.\n- Widerrufsbelehrung: Information über das Recht zum Vertragsrücktritt innerhalb von 14 Tagen.\n- Kontaktdaten: Name und Anschrift des Unternehmens."
+        },
+        {
+            question: "36. Was muss ein Impressum enthalten und warum ist es gesetzlich vorgeschrieben?",
+            answer: "Ein Impressum muss enthalten:\n\n- Name und Anschrift des Unternehmens.\n- Kontaktinformationen: E-Mail-Adresse und Telefonnummer.\n- Vertretungsberechtigte Personen: Geschäftsführer oder Inhaber.\n- Registereintragungen: Handelsregister, Registernummer.\n- Umsatzsteuer-Identifikationsnummer, falls vorhanden.\n\nEs ist gesetzlich vorgeschrieben, um Transparenz und Verantwortlichkeit sicherzustellen und Verbrauchern sowie Behörden eine Kontaktaufnahme zu ermöglichen."
+        },
+        {
+            question: "37. Welche steuerlichen Aspekte müssen im E-Commerce berücksichtigt werden, insbesondere im Hinblick auf das OSS-Verfahren?",
+            answer: "Steuerliche Aspekte umfassen:\n\n- Umsatzsteuer: Anwendung des richtigen Steuersatzes, Inlands- und Auslandsverkäufe.\n- Lieferschwellen: Überschreitung führt zur Umsatzsteuerpflicht im Bestimmungsland.\n- OSS-Verfahren (One-Stop-Shop): Vereinfachtes Verfahren zur Meldung und Abführung der Umsatzsteuer bei grenzüberschreitenden B2C-Lieferungen innerhalb der EU.\n- Dokumentationspflichten: Aufzeichnungen über Umsätze und Steuern für Finanzbehörden."
+        },
+        {
+            question: "38. Welche Kennzahlen (KPIs) sind wichtig für die Messung und Analyse von Vertriebskanälen?",
+            answer: "Wichtige KPIs sind:\n\n- Traffic: Anzahl der Besucher auf der Website oder im Shop.\n- Conversion Rate: Prozentsatz der Besucher, die eine gewünschte Aktion ausführen.\n- Abbruchrate: Anteil der Besucher, die den Kaufprozess abbrechen.\n- Customer Acquisition Cost (CAC): Kosten für die Gewinnung eines neuen Kunden.\n- Customer Lifetime Value (CLV): Gesamter erwarteter Umsatz pro Kunde."
+        },
+        {
+            question: "39. Wie wird die Conversion Rate berechnet und warum ist sie wichtig?",
+            answer: "Die Conversion Rate wird berechnet mit der Formel:\n\nConversion Rate = (Anzahl der Conversions / Anzahl der Besucher) x 100\n\nSie ist wichtig, weil sie anzeigt, wie effektiv eine Website oder ein Vertriebskanal darin ist, Besucher zu Kunden oder Leads zu konvertieren. Eine höhere Conversion Rate bedeutet eine bessere Performance und Effizienz des Kanals."
+        },
+        {
+            question: "40. Was ist Customer Lifetime Value (CLV) und wie wird er berechnet?",
+            answer: "Der Customer Lifetime Value (CLV) ist der gesamte erwartete Umsatz, den ein Kunde während seiner Geschäftsbeziehung mit einem Unternehmen generiert. Er wird berechnet mit der Formel:\n\nCLV = Durchschnittlicher Bestellwert x Kaufhäufigkeit pro Jahr x Kundendauer in Jahren\n\nDer CLV hilft Unternehmen, den langfristigen Wert von Kundenbeziehungen zu verstehen und Marketinginvestitionen entsprechend zu planen."
+        },
+        {
+            question: "41. Welche Analytics-Tools können im E-Commerce eingesetzt werden und welche Vorteile bieten sie?",
+            answer: "Analytics-Tools umfassen:\n\n- Google Analytics: Umfangreiche Daten zu Besucherzahlen, Verhalten, Conversions; kostenlos in der Grundversion.\n- Matomo: Ähnliche Funktionen wie Google Analytics, mit dem Vorteil der Datenhoheit durch eigenes Hosting.\n- Dashboard-Tools: Google Data Studio, Tableau, Microsoft Power BI für die Visualisierung von KPIs.\n\nVorteile sind die Datenanalyse zur Optimierung von Marketingmaßnahmen, Verbesserung der Benutzererfahrung und datengetriebene Entscheidungsfindung."
+        },
+        {
+            question: "42. Was versteht man unter Conversion Rate Optimization (CRO) und welche Methoden gibt es?",
+            answer: "CRO ist die Praxis, die Conversion Rate durch gezielte Maßnahmen zu erhöhen. Methoden umfassen:\n\n- A/B-Testing: Vergleich zweier Versionen einer Seite oder eines Elements, um die bessere Performance zu ermitteln.\n- Usability-Analysen: Identifikation von Hindernissen im Nutzerfluss.\n- Heatmaps: Visualisierung von Klick- und Scrollverhalten der Nutzer.\n- Personalisierung: Anpassung von Inhalten an individuelle Nutzerpräferenzen."
+        },
+        {
+            question: "43. Welche zukünftigen Trends beeinflussen den Online-Vertrieb und wie können Unternehmen davon profitieren?",
+            answer: "Zukünftige Trends sind:\n\n- Künstliche Intelligenz (KI): Automatisierung von Prozessen, Personalisierung von Angeboten.\n- Augmented Reality (AR) und Virtual Reality (VR): Neue Einkaufserlebnisse durch virtuelle Produktpräsentationen.\n- Voice Commerce: Einkauf über Sprachassistenten, erfordert Anpassung von Angeboten und SEO.\n- Nachhaltigkeit: Steigende Bedeutung von umweltfreundlichen Produkten und Prozessen.\n\nUnternehmen können profitieren, indem sie diese Technologien frühzeitig integrieren und auf veränderte Verbraucherbedürfnisse reagieren."
+        },
+        {
+            question: "44. Wie können künstliche Intelligenz und Personalisierung im E-Commerce eingesetzt werden?",
+            answer: "KI und Personalisierung können eingesetzt werden für:\n\n- Chatbots: Automatisierte Kundenbetreuung und Support.\n- Produktempfehlungen: Individuelle Vorschläge basierend auf Kundenverhalten und -präferenzen.\n- Preisoptimierung: Dynamische Anpassung von Preisen in Echtzeit.\n- Marketing-Automatisierung: Segmentierung und gezielte Ansprache von Kunden."
+        },
+        {
+            question: "45. Welche Anwendungen gibt es für Augmented Reality (AR) und Virtual Reality (VR) im Online-Handel?",
+            answer: "Anwendungen umfassen:\n\n- Virtuelle Anproben: Kunden können Kleidung, Brillen oder Make-up virtuell ausprobieren.\n- Produktvisualisierung: Möbel oder Dekorationsartikel können in der eigenen Umgebung betrachtet werden.\n- Virtuelle Showrooms: Interaktive Präsentation von Produkten in einer virtuellen Umgebung.\n\nDiese Technologien verbessern das Kundenerlebnis und können die Kaufentscheidung positiv beeinflussen."
+        },
+        {
+            question: "46. Was ist Voice Commerce und welche Potenziale bietet er?",
+            answer: "Voice Commerce ist der Einkauf von Produkten über Sprachbefehle mit Sprachassistenten wie Amazon Alexa, Google Assistant oder Apple Siri. Potenziale sind:\n\n- Bequemlichkeit: Einkäufe können freihändig und schnell getätigt werden.\n- Neue Interaktionswege: Unternehmen können spezielle Angebote für Voice Search entwickeln.\n- Markenbindung: Aufbau von Voice Apps (Skills), die die Kundenbindung stärken."
+        },
+        {
+            question: "47. Warum gewinnt Nachhaltigkeit im E-Commerce an Bedeutung und wie können Unternehmen darauf reagieren?",
+            answer: "Nachhaltigkeit gewinnt an Bedeutung, da Verbraucher zunehmend umweltbewusst einkaufen und soziale Verantwortung von Unternehmen erwarten. Unternehmen können reagieren durch:\n\n- Umweltfreundliche Verpackungen: Reduktion von Plastik, Nutzung recycelbarer Materialien.\n- Klimaneutraler Versand: Kompensation von CO₂-Emissionen.\n- Transparenz in der Lieferkette: Offenlegung von Produktionsbedingungen.\n- Nachhaltige Produkte: Angebot von ökologisch und sozial verträglichen Waren."
+        },
+        {
+            question: "48. Nennen Sie Beispiele für erfolgreiche Strategien von Unternehmen im Bereich des Online-Vertriebs.",
+            answer: "Beispiele:\n\n- Amazon: Nutzung einer umfassenden Plattform mit eigenem Marktplatz, Logistik und Personalisierung durch KI.\n- Zalando: Omnichannel-Strategie mit Fokus auf Kundenservice und einfacher Rückgabe.\n- Warby Parker: Einsatz von AR für virtuelle Anproben von Brillen, kombiniert mit Social Media Marketing.\n- Nike: Direkter Kundenkontakt über eigene Kanäle, Personalisierung von Produkten und starke Markenkommunikation."
+        },
+        {
+            question: "49. Was sind die Schlüssel zum Erfolg im E-Commerce gemäß den Best Practices?",
+            answer: "Schlüssel zum Erfolg:\n\n- Kundenorientierung: Verständnis und Erfüllung der Kundenbedürfnisse.\n- Datengetriebene Entscheidungen: Nutzung von Analytics zur kontinuierlichen Verbesserung.\n- Technologische Innovation: Einsatz moderner Technologien zur Effizienzsteigerung und Differenzierung.\n- Flexibilität und Anpassungsfähigkeit: Schnelle Reaktion auf Marktveränderungen und Feedback.\n- Starke Markenbildung: Klare Positionierung und konsistente Kommunikation."
+        },
+        {
+            question: "50. Wie trägt eine fundierte Analyse der Zielgruppe, des Wettbewerbs und der eigenen Ressourcen zum Erfolg im E-Commerce bei?",
+            answer: "Eine fundierte Analyse ermöglicht es, maßgeschneiderte Strategien zu entwickeln, die auf die spezifischen Bedürfnisse der Zielgruppe abgestimmt sind. Sie hilft, Wettbewerbsvorteile zu identifizieren und Ressourcen effektiv einzusetzen. Dadurch können Unternehmen effizienter agieren, Risiken minimieren und ihre Erfolgschancen im E-Commerce deutlich erhöhen."
+        }
+    ];
+
+    // Funktion zum Mischen des Arrays (Fisher-Yates Shuffle)
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    // Variablen
+    let remainingCards = shuffle([...cards]); // Kopie des Arrays erstellen und mischen
+    let currentCard = null;
+    let showingQuestion = true;
+
+    const cardDiv = document.getElementById('card');
+    const cardContent = document.getElementById('card-content');
+    const buttonsDiv = document.getElementById('buttons');
+    const knowButton = document.getElementById('know-button');
+    const dontKnowButton = document.getElementById('dont-know-button');
+    const remainingCountSpan = document.getElementById('remaining-count');
+    const backButton = document.getElementById('back-button');
+
+    // Funktion zum Aktualisieren des Counters
+    function updateCounter() {
+        remainingCountSpan.textContent = remainingCards.length;
+    }
+
+    function showNextCard() {
+        if (remainingCards.length === 0) {
+            cardContent.innerHTML = "<strong>Herzlichen Glückwunsch!</strong><br>Sie haben alle Karteikarten korrekt beantwortet.";
+            buttonsDiv.style.display = 'none';
+            remainingCountSpan.textContent = 0;
+            return;
+        }
+
+        currentCard = remainingCards[0];
+        showingQuestion = true;
+        cardContent.innerHTML = "<strong>Frage:</strong><br>" + currentCard.question;
+        buttonsDiv.style.display = 'none';
+        updateCounter();
+    }
+
+    cardContent.addEventListener('click', function() {
+        if (!currentCard) {
+            showNextCard();
+            return;
+        }
+
+        if (showingQuestion) {
+            cardContent.innerHTML = "<strong>Antwort:</strong><br>" + currentCard.answer;
+            showingQuestion = false;
+            buttonsDiv.style.display = 'block';
+        }
+    });
+
+    knowButton.addEventListener('click', function() {
+        // Karteikarte aus dem Stapel entfernen
+        remainingCards.shift();
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    dontKnowButton.addEventListener('click', function() {
+        // Karteikarte ans Ende des Stapels verschieben
+        remainingCards.push(remainingCards.shift());
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    backButton.addEventListener('click', function() {
+        // Zurück zur vorherigen Seite navigieren
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Initiale Anzeige des Counters
+    updateCounter();
+
+    // Start mit der ersten Frage
+    cardContent.innerHTML = "Klicken Sie hier, um die erste Frage anzuzeigen.";
+</script>
+
+</body>
+</html>

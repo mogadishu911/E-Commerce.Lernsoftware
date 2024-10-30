@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Commerce Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        .options li button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            text-align: left;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #progress {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #restart, #back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>E-Commerce Quiz</h1>
+    <div id="question-container">
+        <!-- Die Frage wird hier eingefügt -->
+    </div>
+    <div id="progress">
+        Frage <span id="current-question-number">1</span> von <span id="total-questions">20</span>
+    </div>
+    <div id="result"></div>
+    <button id="restart" style="display: none;">Quiz neu starten</button>
+    <button id="back-button">Zurück</button>
+</div>
+
+<script>
+    // Neue Fragen mit Multiple-Choice-Antworten
+    const questions = [
+        {
+            question: "1. Die Einführung der Geschäftseinheit 'Young Generation' wird zeitlich in Form eines Balkendiagramms dargestellt. Geben Sie an, welche Funktion ein Balkendiagramm erfüllt!",
+            options: [
+                "Das Gantt-Chart oder auch Balkendiagramm ist geeignet für die Terminkoordination von Projekten. Balkendiagramme werden vorwiegend zur zeitlichen Koordination eingesetzt, z. B. in der Bauplanung oder in der Urlaubsplanung.",
+                "Nach der DIN 69 900 dient das Balkendiagramm als Instrument zur Planung und Steuerung von Projekten. Das Balkendiagramm zeigt auf grafische Weise die funktionale Abhängigkeit einzelner Vorgänge voneinander.",
+                "Das Balkendiagramm ist ein Instrument der Aufbauorganisation und zeigt den funktionalen und hierarchischen Aufbau der Globetrader GmbH.",
+                "Das Balkendiagramm (engl. Gantt-Chart) stellt die Art der Verwendung, die Bereitstellung und Veränderung von Daten innerhalb eines Programms in tabellarischer Form dar.",
+                "Das Balkendiagramm als ein Instrument der Kreativtechnik ist eine Gedankenlandkarte."
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "2. Sie sollen die in der neuen Geschäftseinheit eingesetzten Auszubildenden über typische Arbeitsweisen der Projektarbeit informieren. Geben Sie den Unterschied zwischen Routinearbeit und Projektarbeit an!",
+            options: [
+                "Der wesentliche Unterschied zwischen Routinearbeit und Projektarbeit ist, dass sich bei der Projektarbeit immer nur die Ablauforganisation ändert.",
+                "Die Projektarbeit beschäftigt sich mit Vorhaben, die im Wesentlichen durch bereits bekannte Abläufe, ein eingespieltes Team und ein festes Budget gekennzeichnet sind.",
+                "Projektarbeit ist immer ein Teil der Routinearbeit eines Mitarbeiters.",
+                "Der wesentliche Unterschied zwischen Routinearbeit und Projektarbeit ist, dass sich bei der Routinearbeit die Organisationsform nie ändert.",
+                "Die Projektarbeit ist zeitlich befristete komplexe Aufgabe mit vorgegebenem Start und Endpunkt."
+            ],
+            correctAnswer: 4
+        },
+        {
+            question: "3. Bei der Implementierung der strategischen Geschäftseinheit 'Young Generation' als Projekt berücksichtigen Sie das Magische Dreieck im Projektmanagement. Wie beschreiben Sie das Modell des Magischen Dreiecks richtig?",
+            options: [
+                "Im Magischen Dreieck des Projektmanagements wurden 1967 die projektwirtschaftspolitischen Ziele Zeit, Kosten und Sachinhalt bzw. Qualität/Leistung festgeschrieben.",
+                "Das Magische Dreieck beschreibt ein volkswirtschaftliches System mit den drei wirtschaftspolitischen Zielen angemessenes Wirtschaftswachstum, Kosten und Preisstabilität.",
+                "Das Magische Dreieck des Projektmanagements bezeichnet die bei der Vermögensanlage untereinander konkurrierenden Ziele Rentabilität, Sicherheit und Liquidität.",
+                "Das Modell des Magischen Dreiecks stellt drei Parameter auf, die ein Projekt und dessen Erfolg bestimmen: Zeit, Kosten und Sachinhalt bzw. Qualität/Leistung.",
+                "Das Magische Dreieck des Projektmanagements wurde im Rahmen der Revision der ISO 9001 im Jahr 2015 um den Parameter Nachhaltigkeit erweitert."
+            ],
+            correctAnswer: 3
+        },
+        {
+            question: "4. Sie werden die Marketingstrategien zur Implementierung der Geschäftseinheit 'Young Generation' zur Abrundung des Produktportfolios der Globetrader GmbH unter anderem mit dem traditionellen Marketing-Mix, den sogenannten '4 P', konkret umsetzen. Geben Sie an, welches Instrument nicht den traditionellen '4 P' zugerechnet wird!",
+            options: [
+                "Process",
+                "Product",
+                "Price",
+                "Place",
+                "Promotion"
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "5. Sie erklären den Auszubildenden, welcher Unterpunkt im Rahmen der Weiterentwicklung des Sortiments zu dem absatzpolitischen Instrument 'Produkt-/Sortimentspolitik' gehört. Geben Sie diesen an!",
+            options: [
+                "Werbung",
+                "Category Management",
+                "Dropshipping",
+                "Indirekter Absatzweg",
+                "Direkter Absatzweg"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "6. Sie erklären weiterhin, dass das Sortiment der Globetrader GmbH nach logischen Bausteinen systematisiert ist. Diese Systematisierung wird auch als Sortimentspyramide bezeichnet. Wie wird die kleinste Einheit des Sortiments bezeichnet?",
+            options: [
+                "Aktionssortiment",
+                "Warengruppe",
+                "Sorte/Variante",
+                "Kernsortiment",
+                "Warenart"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "7. Einer Ihrer Auszubildenden fragt Sie, was man unter Content-Marketing versteht. Geben Sie die korrekte Auskunft!",
+            options: [
+                "Content Marketing ist eine besondere Form des Dropshipping.",
+                "Content-Marketing ist eine Form der Werbung und somit ein Teil der Preispolitik.",
+                "Content Marketing ist die reine Werbung mittels Werbeanzeigen in Suchmaschinen wie z. B. auf Google oder Bing.",
+                "Content-Marketing ist eine Marketingtechnik, bei der relevante Inhalte kreiert werden, um Interessenten für die Produkte der Globetrader GmbH zu gewinnen.",
+                "Content Marketing ist eine sekundäre Online-Marketing-Methode, die digital in den Suchmaschinen und im Adsense-Netzwerk bzw. Display-Netzwerk von Google stattfindet."
+            ],
+            correctAnswer: 3
+        },
+        {
+            question: "8. Welche Information gibt Ihnen die Kennzahl Wirtschaftlichkeit im Hinblick auf die Geschäftseinheit 'Young Generation'?",
+            options: [
+                "Die Wirtschaftlichkeit gibt die 'Ab-Verzinsung' des gesamten, in einem Unternehmen eingesetzten Kapitals, das sich aus Eigenkapital und Fremdkapital zusammensetzt, an.",
+                "Die Wirtschaftlichkeit zeigt die 'Verzinsung' der Investition (Kapitalrentabilität) an.",
+                "Die Wirtschaftlichkeit zeigt den Gewinn im Verhältnis zum Umsatz an.",
+                "Die Wirtschaftlichkeit ist Ausdruck der 'Verzinsung' des eingesetzten Eigenkapitals.",
+                "Die Wirtschaftlichkeit zeigt an, wie effizient die Implementierung ist. Sie erhöht sich, wenn die Erträge bzw. Erlöse steigen oder der Aufwand bzw. die Kosten sinken."
+            ],
+            correctAnswer: 4
+        },
+        {
+            question: "9. Die Globetrader GmbH verwendet eine Formel als Hilfsmittel zur Formulierung ihrer Marketingziele. Geben Sie diese Formel an!",
+            options: [
+                "KOALA",
+                "AIDA",
+                "SMART",
+                "ALPEN",
+                "KEC"
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "10. Sie kennen den Deckungsbeitrag als eine wichtige betriebswirtschaftliche Kennzahl zur Erfolgsermittlung sowie Preiskalkulation. Prüfen Sie, welcher Sachverhalt zum Deckungsbeitrag richtig beschrieben ist!",
+            options: [
+                "Als Deckungsbeitrag bezeichnet man die Differenz zwischen Erlösen und variablen Kosten. Der Deckungsbeitrag gibt somit an, wie viel ein Produkt zur Deckung der Fixkosten beiträgt.",
+                "Als Deckungsbeitrag bezeichnet man die Differenz zwischen Erlösen und fixen Kosten. Der Deckungsbeitrag gibt somit an, wie viel ein Produkt zur Deckung der variablen Kosten beiträgt.",
+                "Der Deckungsbeitrag zeichnet sich dadurch aus, dass er mit steigender Absatzmenge sinkt und damit einen größeren Beitrag zur Deckung der variablen Kosten leistet.",
+                "Der Deckungsbeitrag entspricht dem Rohgewinn.",
+                "Der Deckungsbeitrag ist stets positiv."
+            ],
+            correctAnswer: 0
+        },
+        {
+            question: "11. Sie erklären den Auszubildenden die Unterschiede zwischen den verschiedenen Kostenarten. Welche Kostenart gehört nicht zu den Fixkosten?",
+            options: [
+                "Abschreibungen, die linear erfolgen",
+                "Treibstoffe für den betriebseigenen Fuhrpark",
+                "Arbeitsentgelte als feste Grundlöhne",
+                "Miete und Pacht",
+                "Leasingkosten für IT-Systeme"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "12. Bei der Auswertung des Nutzerverhaltens spielt die Bounce-Rate eine wichtige Rolle. Geben Sie an, wofür diese Kennzahl steht!",
+            options: [
+                "Die Bounce-Rate legt fest, welche Funktionen des Web-Shops dem Nutzer zugänglich gemacht werden.",
+                "Die Bounce-Rate ist ein übliches erfolgsabhängiges Abrechnungsverfahren. Hierbei zahlt der Werbetreibende je Klick auf eine von ihm geschaltete Online-Werbung einen bestimmten Preis an den Seitenbetreiber.",
+                "Die Bounce-Rate beschreibt den Wert eines Kunden für die Globetrader GmbH, bei dem nicht nur vergangene, sondern auch zukünftige Aktionen berücksichtigt werden.",
+                "Die Bounce-Rate beschreibt, wie Investitionen in die individuelle Geschäftsbeziehung bzw. Kundenbetreuung getätigt werden, die sich im Verlaufe der Zeit durch potenziell höhere Kundeneinzahlungen exponentiell entwickeln.",
+                "Die Bounce-Rate ist eine Kennzahl aus dem Bereich Web Analytics und beschreibt, wie viele Nutzer die Website der Globetrader GmbH betreten und, ohne eine weitere (festgelegte) Aktion auszuführen, wieder verlassen."
+            ],
+            correctAnswer: 4
+        },
+        {
+            question: "13. Neben qualitativen spielen auch quantitative Merkmale bei der Auswertung des Nutzerverhaltens eine wichtige Rolle. Prüfen Sie, in welcher Alternative der Unterschied zwischen qualitativen und quantitativen Merkmalen richtig beschrieben bzw. genannt ist!",
+            options: [
+                "Beispiele für quantitative Merkmale: Nutzerzufriedenheit, Nutzererfahrung",
+                "Beispiele für qualitative Merkmale: Nutzerzufriedenheit, Nutzererfahrung",
+                "Beispiele für qualitative Merkmale: Umsatz, Absatz",
+                "Qualitative Merkmale sind immer sofort und eindeutig bestimmbar in Mengen und Werten.",
+                "Quantitative Merkmale sind nicht eindeutig bestimmbar und müssen zunächst in Qualitäten wie z. B. Menge und Wert transformiert werden."
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "14. Ihr Ausbilder erklärt Ihnen, dass die Analyse des Kundenverhaltens ein wichtiges Instrument im Customer-Experience-Management ist. Welche Erläuterung spiegelt den Customer-Experience-Managementansatz (Kundenerfahrungsmanagement) richtig wider?",
+            options: [
+                "Das Customer-Experience-Management erfolgt als Alternative zum Web-Shop rein über das Telefon. Die Mitarbeiter der Globetrader GmbH beraten die Kunden passgenau und schlagen ihnen individuelle Angebote und Dienstleistungen vor.",
+                "Beim Customer-Experience-Management geht es nur darum, welche Produkte von der Globetrader GmbH häufig zusammen gekauft werden, um ein standardisiertes Beschaffungswesen zu entwickeln.",
+                "Als Management-Ansatz geht es beim Customer-Experience-Management um die Schaffung positiver Kundenerlebnisse zum Aufbau einer langfristigen und emotionalen Bindung zwischen Kunden/Nutzer und der Globetrader GmbH.",
+                "Das Customer-Experience-Management fördert auf Grund des demographischen Wandels, also des steigenden Anteils älterer Menschen an der Gesamtbevölkerung, barrierefreie Produkte.",
+                "Das Customer-Experience-Management ist eine Weiterentwicklung des Managements der Vielfalt und somit Teil der absatzpolitischen Instrumente und findet seinen Schwerpunkt in der Produktpolitik."
+            ],
+            correctAnswer: 2
+        },
+        {
+            question: "15. Mit einem Teilsortiment wird die Globetrader GmbH auf einem großen, wettbewerbsintensiven Marktplatz aktiv. Wegen der guten Einkaufskonditionen strebt Ihr Unternehmen eine Preisführer-Position an. Prüfen Sie, welcher Sachverhalt zum Dynamic Pricing richtig ist!",
+            options: [
+                "Beim Dynamic Pricing bietet der Kunde im Rahmen einer Auktion auf ein Produkt.",
+                "Dynamic Pricing ist die dynamische Anpassung des Verkaufspreises als Reaktion auf Veränderungen im Markt.",
+                "Dynamic Pricing ist ein echtzeitgesteuertes Zahlverfahren.",
+                "Beim Dynamic Pricing ermittelt der Händler den Angebotspreis regelmäßig auf Grundlage des abnehmenden Grenznutzens.",
+                "Dynamic Pricing beschreibt die Preis-Elastizität der Kunden."
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "16. Ein Werbewirkungsprinzip ist das Stufenmodell AIDA. Geben Sie die Begriffe an, die hinter dieser Abkürzung stehen!",
+            options: [
+                "Affect, Interest, Desire und Action",
+                "Attention, Interest, Desire und Action",
+                "Attention, Interest, Defining und Action",
+                "Advertising, Interest, Desire und Action",
+                "Attention, Infect, Desire und Action"
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "17. Der CPM (Cost per Mille) ist ein Modell, mit dem der Preis für Werbemittel errechnet werden kann. Geben Sie an, wie dieser ermittelt wird!",
+            options: [
+                "Der CPM wird berechnet, indem man die Werbekosten durch die Gesamtzahl der Aufrufe teilt und anschließend das Ergebnis mit 1000 multipliziert.",
+                "Der CPM errechnet sich aus der Differenz zwischen den erzielten Erlösen und den variablen Kosten.",
+                "Der CPM errechnet sich als Differenz zwischen den erzielten Erlösen und den variablen Kosten.",
+                "Der CPM errechnet sich aus den Ausgaben für Werbung aller Leads beziehungsweise Anzahl aller Leads geteilt durch 1000.",
+                "Der CPM errechnet sich aus den durchschnittlichen Kosten je erreichter Reaktion mal 1000, z. B. einer Bestellung oder eines abgeschlossenen Abonnements."
+            ],
+            correctAnswer: 4
+        },
+        {
+            question: "18. In der oben genannten Grafik fällt Ihnen unter anderem die Conversion Rate zu den Zielvorhaben auf. Was gibt diese Conversion Rate an?",
+            options: [
+                "Diese Conversion Rate gibt den prozentualen Anteil der Besucher wieder, die irgendeine Handlung auf der Webseite getätigt haben.",
+                "Diese Conversion Rate gibt den prozentualen Anteil der Besucher wieder, die eine zuvor festgelegte Handlung auf der Webseite getätigt haben.",
+                "Diese Conversion Rate gibt den prozentualen Anteil der Besucher wieder, die nur eine Bestellung getätigt haben.",
+                "Diese Conversion Rate gibt den prozentualen Anteil der Besucher wieder, die nur etwas in den Warenkorb gelegt haben.",
+                "Diese Conversion Rate gibt den prozentualen Anteil der Besucher wieder, die Sie von einem Mitbewerber abgeworben haben."
+            ],
+            correctAnswer: 1
+        },
+        {
+            question: "19. Zusammen mit Ihren Kollegen schauen Sie sich ebenfalls folgende Grafik an. Geben Sie an, was unter der Absprungrate verstanden wird!",
+            options: [
+                "Die Absprungrate ist der Anteil der Besucher, die nichts bestellt haben.",
+                "Die Absprungrate ist der Anteil der Besucher, die nichts in den Warenkorb gelegt haben.",
+                "Die Absprungrate ist der Anteil der Besucher, die lediglich eine Minute auf der Webseite waren.",
+                "Die Absprungrate ist der Anteil der Besucher, die sich nur eine einzige Seite angeschaut und diese gleich wieder verlassen haben.",
+                "Die Absprungrate ist der Anteil der Besucher, die sich mehrere Seiten innerhalb von 30 Sekunden angeschaut haben."
+            ],
+            correctAnswer: 3
+        },
+        {
+            question: "20. Ihr Abteilungsleiter bittet Sie, sich folgende Grafik anzuschauen und Empfehlungen zu erstellen, wie Sie den Anteil der 'Organic Search'-Quelle für Ihre Webseite erhöhen können. Geben Sie die korrekte Empfehlung!",
+            options: [
+                "Sie schalten bezahlte Anzeigen bei Google und Bing.",
+                "Sie schalten bezahlte Anzeigen in den Social-Media-Kanälen der Globetrader GmbH.",
+                "Sie erzielen mit Search Engine Optimization (SEO)-Maßnahmen bessere Rankings bei den Suchmaschinen.",
+                "Sie schicken per E-Mail allen Ihren Bestandskunden einen direkten Link auf Ihre Webseite.",
+                "Sie erstellen einen QR-Code, den Sie auf allen Katalogen abdrucken mit einem direkten Link auf Ihre Webseite."
+            ],
+            correctAnswer: 2
+        }
+    ];
+
+    // Variablen für den Quizstatus
+    let remainingQuestions = [...questions]; // Kopie der Fragen
+    let currentQuestionIndex = null;
+    let correctAnswers = [];
+    let totalQuestions = questions.length;
+
+    const questionContainer = document.getElementById('question-container');
+    const progressText = document.getElementById('current-question-number');
+    const totalQuestionsText = document.getElementById('total-questions');
+    const resultDiv = document.getElementById('result');
+    const restartButton = document.getElementById('restart');
+    const backButton = document.getElementById('back-button');
+
+    totalQuestionsText.textContent = totalQuestions;
+
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function loadNextQuestion() {
+        if (remainingQuestions.length === 0) {
+            // Quiz beendet
+            questionContainer.innerHTML = "<h2>Herzlichen Glückwunsch!</h2><p>Sie haben alle Fragen korrekt beantwortet.</p>";
+            progressText.textContent = totalQuestions;
+            restartButton.style.display = 'block';
+            return;
+        }
+
+        // Nächste Frage laden
+        currentQuestionIndex = Math.floor(Math.random() * remainingQuestions.length);
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        // Frage anzeigen
+        questionContainer.innerHTML = `
+            <div class="question">${currentQuestion.question}</div>
+            <ul class="options">
+                ${currentQuestion.options.map((option, index) => `<li><button data-index="${index}">${option}</button></li>`).join('')}
+            </ul>
+        `;
+
+        // Fortschritt aktualisieren
+        progressText.textContent = totalQuestions - remainingQuestions.length + 1;
+
+        // Event Listener für Optionen hinzufügen
+        const optionButtons = document.querySelectorAll('.options button');
+        optionButtons.forEach(button => {
+            button.addEventListener('click', checkAnswer);
+        });
+    }
+
+    function checkAnswer(event) {
+        const selectedOption = parseInt(event.target.getAttribute('data-index'));
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (selectedOption === currentQuestion.correctAnswer) {
+            // Richtige Antwort
+            event.target.classList.add('correct');
+            correctAnswers.push(currentQuestion);
+            remainingQuestions.splice(currentQuestionIndex, 1);
+        } else {
+            // Falsche Antwort
+            event.target.classList.add('incorrect');
+            // Optionale Rückmeldung anzeigen
+            // alert('Falsche Antwort. Versuchen Sie es bei der nächsten Runde erneut.');
+        }
+
+        // Buttons deaktivieren
+        const optionButtons = document.querySelectorAll('.options button');
+        optionButtons.forEach(button => {
+            button.disabled = true;
+        });
+
+        // Kurz warten und nächste Frage laden
+        setTimeout(loadNextQuestion, 1000);
+    }
+
+    restartButton.addEventListener('click', function() {
+        // Quiz zurücksetzen
+        remainingQuestions = [...questions];
+        correctAnswers = [];
+        currentQuestionIndex = null;
+        restartButton.style.display = 'none';
+        resultDiv.textContent = '';
+        loadNextQuestion();
+    });
+
+    backButton.addEventListener('click', function() {
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Quiz starten
+    shuffle(remainingQuestions);
+    loadNextQuestion();
+</script>
+
+</body>
+</html>

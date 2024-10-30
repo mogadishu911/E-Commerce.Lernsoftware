@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Karteikartenprogramm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            position: relative; /* Für die Positionierung des Counters */
+            background-color: #f5f5f5;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        #back-button {
+            position: absolute;
+            left: 0;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        #back-button:hover {
+            background-color: #0056b3;
+        }
+        #card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            text-align: left;
+            font-size: 1.1em;
+            line-height: 1.5em;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #card-content {
+            cursor: pointer;
+            white-space: pre-line; /* Ermöglicht Zeilenumbrüche bei \n */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #buttons button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            border: none;
+            color: #fff;
+        }
+        #know-button {
+            background-color: #28a745;
+        }
+        #know-button:hover {
+            background-color: #218838;
+        }
+        #dont-know-button {
+            background-color: #dc3545;
+        }
+        #dont-know-button:hover {
+            background-color: #c82333;
+        }
+        /* Stil für den verbleibenden Karten-Counter */
+        #counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            z-index: 1000; /* Sicherstellen, dass der Counter oben bleibt */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button id="back-button">Zurück</button>
+    <h1>Karteikartenprogramm</h1>
+</header>
+
+<div id="card">
+    <div id="card-content">Klicken Sie hier, um die erste Frage anzuzeigen.</div>
+    <div id="buttons" style="display: none;">
+        <button id="dont-know-button">✗ Ich wusste es nicht</button>
+        <button id="know-button">✓ Ich wusste es</button>
+    </div>
+</div>
+
+<!-- Anzeige für verbleibende Karteikarten -->
+<div id="counter">Verbleibende Karten: <span id="remaining-count">0</span></div>
+
+<script>
+    // Fragen und Antworten
+    const cards = [
+    
+    {
+        question: "Was ist ein Customer Relationship Management (CRM) System?",
+        answer: "Ein CRM-System unterstützt Unternehmen dabei, Kundenbeziehungen durch Datenverwaltung, Interaktionshistorie und gezielte Kommunikation zu pflegen. Es fördert die Kundenbindung und verbessert die Kundenerfahrung durch personalisierte Ansprache."
+    },
+    {
+        question: "Welche Kennzahlen (KPIs) sind im E-Commerce besonders wichtig?",
+        answer: "Wichtige KPIs sind Conversion Rate, Customer Lifetime Value (CLV), Customer Acquisition Cost (CAC), Retourenquote, Warenkorbabbruchrate, und durchschnittlicher Bestellwert. Sie helfen, die Effizienz und Rentabilität der Marketingstrategien zu bewerten."
+    },
+    {
+        question: "Was ist der Unterschied zwischen einer Bruttomarge und einer Nettomarge?",
+        answer: "Die Bruttomarge berechnet den Gewinn nach Abzug der Herstellungskosten, während die Nettomarge den Gewinn nach Abzug aller Kosten, einschließlich Fixkosten und Steuern, darstellt. Sie zeigt die Rentabilität eines Produkts oder Unternehmens."
+    },
+    {
+        question: "Welche Rolle spielt die Logistik im E-Commerce?",
+        answer: "Die Logistik im E-Commerce umfasst Lagerung, Kommissionierung, Verpackung und Versand. Eine effiziente Logistik optimiert Lieferzeiten, senkt Kosten und verbessert die Kundenzufriedenheit."
+    },
+    {
+        question: "Was ist ein 'Conversion Funnel' und wie wird er im E-Commerce verwendet?",
+        answer: "Ein Conversion Funnel zeigt die Phasen, die ein Kunde von der ersten Interaktion bis zur Conversion (z.B. Kauf) durchläuft. Ziel ist es, Kunden durch den Funnel zu führen und dabei Abbrüche durch Optimierung zu minimieren."
+    },
+    {
+        question: "Was ist das Pareto-Prinzip im Marketing?",
+        answer: "Das Pareto-Prinzip (80/20-Regel) besagt, dass 80 % des Umsatzes oft von 20 % der Kunden stammen. Unternehmen können so Fokusgruppen identifizieren und gezielte Marketingmaßnahmen auf diese profitabelsten Kunden ausrichten."
+    },
+    {
+        question: "Was versteht man unter der Warenkorb-Abbruchrate?",
+        answer: "Die Warenkorb-Abbruchrate gibt den Anteil der Kunden an, die Produkte in den Warenkorb legen, den Kauf jedoch nicht abschließen. Sie kann durch Optimierungen wie einfachen Checkout und klare Versandinformationen gesenkt werden."
+    },
+    {
+        question: "Was ist der Net Promoter Score (NPS)?",
+        answer: "Der Net Promoter Score misst die Wahrscheinlichkeit, dass Kunden das Unternehmen weiterempfehlen. Der NPS dient als Indikator für Kundenzufriedenheit und -bindung und wird durch regelmäßige Kundenbefragungen ermittelt."
+    },
+    {
+        question: "Was versteht man unter 'A/B-Testing'?",
+        answer: "A/B-Testing vergleicht zwei Varianten einer Webseite, Anzeige oder E-Mail, um festzustellen, welche besser funktioniert. Dies hilft, datengetriebene Entscheidungen zu treffen und die Conversion Rate zu optimieren."
+    },
+    {
+        question: "Was ist der Unterschied zwischen Up-Selling und Cross-Selling?",
+        answer: "Up-Selling bietet dem Kunden eine teurere oder höherwertige Version des Produkts an, während Cross-Selling ergänzende Produkte zum Hauptprodukt vorschlägt, um den Warenkorbwert zu erhöhen."
+    },
+    {
+        question: "Was ist Programmatic Advertising?",
+        answer: "Programmatic Advertising ist die automatisierte, datenbasierte Aussteuerung von Werbeanzeigen in Echtzeit. Mithilfe von Algorithmen und KI wird die Zielgruppe durch Auktionen gezielt angesprochen."
+    },
+    {
+        question: "Welche Bedeutung haben Personalisierung und Recommendation Engines im E-Commerce?",
+        answer: "Personalisierung und Recommendation Engines bieten Kunden gezielte Produktempfehlungen basierend auf Verhalten und Präferenzen, was die Conversion Rate und Kundenbindung erhöht."
+    },
+    {
+        question: "Was ist das 'First-Party Data' im Marketing?",
+        answer: "First-Party Data sind Daten, die Unternehmen direkt von ihren Kunden erheben (z.B. Kaufverhalten, Website-Interaktionen). Sie sind wertvoll, da sie direkt, oft DSGVO-konform und besonders relevant für personalisiertes Marketing sind."
+    },
+    {
+        question: "Welche Rolle spielt die DSGVO im E-Commerce?",
+        answer: "Die Datenschutzgrundverordnung (DSGVO) regelt die Erhebung, Speicherung und Verarbeitung personenbezogener Daten in der EU und schützt die Privatsphäre der Kunden. E-Commerce-Anbieter müssen DSGVO-konform arbeiten."
+    },
+    {
+        question: "Was ist Retention Marketing?",
+        answer: "Retention Marketing fokussiert sich auf die Bindung bestehender Kunden und zielt darauf ab, Wiederkäufe zu fördern, die Kundentreue zu stärken und den Customer Lifetime Value (CLV) zu steigern."
+    },
+    {
+        question: "Was sind PWA (Progressive Web Apps) und welche Vorteile bieten sie?",
+        answer: "PWA sind Websites, die sich wie Apps verhalten und Vorteile wie Offline-Funktionalität, Push-Benachrichtigungen und schnelle Ladezeiten bieten. Sie verbessern das Nutzererlebnis und erfordern keinen App-Store-Download."
+    },
+    {
+        question: "Was ist Affiliate Marketing?",
+        answer: "Affiliate Marketing ist eine Form des Performance-Marketings, bei der Partner für die Generierung von Verkäufen oder Leads durch Provisionen vergütet werden. Es ermöglicht E-Commerce-Unternehmen Reichweitenerweiterung ohne hohe Vorabkosten."
+    },
+    {
+        question: "Was ist Geomarketing?",
+        answer: "Geomarketing ist die Nutzung geografischer Daten für die gezielte Ansprache von Kunden. Es ermöglicht zielgerichtete Werbung und Marketingmaßnahmen in bestimmten Regionen oder auf Basis des Standorts des Kunden."
+    },
+    {
+        question: "Was sind 'Käuferpersonas' und wie werden sie erstellt?",
+        answer: "Käuferpersonas sind fiktive Profile idealer Kunden, basierend auf Daten wie Alter, Beruf, Kaufverhalten und Interessen. Sie helfen, Marketingmaßnahmen gezielt auf die Bedürfnisse und Motivationen der Zielgruppe auszurichten."
+    },
+    {
+        question: "Wie funktioniert das Bidding-Verfahren in der Online-Werbung?",
+        answer: "Beim Bidding-Verfahren geben Unternehmen Gebote auf Keywords ab, um Werbeplätze zu gewinnen. Das höchste Gebot gewinnt meist den Platz. Dies wird u.a. bei Google Ads und Programmatic Advertising genutzt."
+    }
+];
+
+
+
+    // Funktion zum Mischen des Arrays (Fisher-Yates Shuffle)
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    // Variablen
+    let remainingCards = shuffle([...cards]); // Kopie des Arrays erstellen und mischen
+    let currentCard = null;
+    let showingQuestion = true;
+
+    const cardDiv = document.getElementById('card');
+    const cardContent = document.getElementById('card-content');
+    const buttonsDiv = document.getElementById('buttons');
+    const knowButton = document.getElementById('know-button');
+    const dontKnowButton = document.getElementById('dont-know-button');
+    const remainingCountSpan = document.getElementById('remaining-count');
+    const backButton = document.getElementById('back-button');
+
+    // Funktion zum Aktualisieren des Counters
+    function updateCounter() {
+        remainingCountSpan.textContent = remainingCards.length;
+    }
+
+    function showNextCard() {
+        if (remainingCards.length === 0) {
+            cardContent.innerHTML = "<strong>Herzlichen Glückwunsch!</strong><br>Sie haben alle Karteikarten korrekt beantwortet.";
+            buttonsDiv.style.display = 'none';
+            remainingCountSpan.textContent = 0;
+            return;
+        }
+
+        currentCard = remainingCards[0];
+        showingQuestion = true;
+        cardContent.innerHTML = "<strong>Frage:</strong><br>" + currentCard.question;
+        buttonsDiv.style.display = 'none';
+        updateCounter();
+    }
+
+    cardContent.addEventListener('click', function() {
+        if (!currentCard) {
+            showNextCard();
+            return;
+        }
+
+        if (showingQuestion) {
+            cardContent.innerHTML = "<strong>Antwort:</strong><br>" + currentCard.answer;
+            showingQuestion = false;
+            buttonsDiv.style.display = 'block';
+        }
+    });
+
+    knowButton.addEventListener('click', function() {
+        // Karteikarte aus dem Stapel entfernen
+        remainingCards.shift();
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    dontKnowButton.addEventListener('click', function() {
+        // Karteikarte ans Ende des Stapels verschieben
+        remainingCards.push(remainingCards.shift());
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    backButton.addEventListener('click', function() {
+        // Zurück zur vorherigen Seite navigieren
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Initiale Anzeige des Counters
+    updateCounter();
+
+    // Start mit der ersten Frage
+    cardContent.innerHTML = "Klicken Sie hier, um die erste Frage anzuzeigen.";
+</script>
+
+</body>
+</html>

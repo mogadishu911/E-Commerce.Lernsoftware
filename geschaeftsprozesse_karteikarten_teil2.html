@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Karteikartenprogramm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            position: relative; /* Für die Positionierung des Counters */
+            background-color: #f5f5f5;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        #back-button {
+            position: absolute;
+            left: 0;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        #back-button:hover {
+            background-color: #0056b3;
+        }
+        #card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            text-align: left;
+            font-size: 1.1em;
+            line-height: 1.5em;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #card-content {
+            cursor: pointer;
+            white-space: pre-line; /* Ermöglicht Zeilenumbrüche bei \n */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #buttons button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            border: none;
+            color: #fff;
+        }
+        #know-button {
+            background-color: #28a745;
+        }
+        #know-button:hover {
+            background-color: #218838;
+        }
+        #dont-know-button {
+            background-color: #dc3545;
+        }
+        #dont-know-button:hover {
+            background-color: #c82333;
+        }
+        /* Stil für den verbleibenden Karten-Counter */
+        #counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            z-index: 1000; /* Sicherstellen, dass der Counter oben bleibt */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button id="back-button">Zurück</button>
+    <h1>Karteikartenprogramm</h1>
+</header>
+
+<div id="card">
+    <div id="card-content">Klicken Sie hier, um die erste Frage anzuzeigen.</div>
+    <div id="buttons" style="display: none;">
+        <button id="dont-know-button">✗ Ich wusste es nicht</button>
+        <button id="know-button">✓ Ich wusste es</button>
+    </div>
+</div>
+
+<!-- Anzeige für verbleibende Karteikarten -->
+<div id="counter">Verbleibende Karten: <span id="remaining-count">0</span></div>
+
+<script>
+    // Fragen und Antworten
+    const cards = [
+    {
+        question: "1. Was versteht man unter E-Commerce und welche Bedeutung hat er für Unternehmen?",
+        answer: "E-Commerce (Electronic Commerce) ist der Verkauf von Waren und Dienstleistungen über elektronische Netzwerke. Für Unternehmen bedeutet E-Commerce Zugang zu globalen Märkten, 24/7-Verfügbarkeit, geringere Betriebskosten und die Möglichkeit, durch datengetriebenes Marketing gezielt Kundensegmente anzusprechen."
+    },
+    {
+        question: "2. Welche rechtlichen Anforderungen (z.B. DSGVO, AGB, Widerrufsrecht) müssen Online-Händler beachten?",
+        answer: "Online-Händler müssen die DSGVO (Datenschutz-Grundverordnung) einhalten, um personenbezogene Daten zu schützen, ein vollständiges Impressum und AGB bereitstellen sowie eine Widerrufsbelehrung mit 14-tägigem Rückgaberecht für Verbraucher bieten. Außerdem müssen sie steuerliche Vorschriften und das Fernabsatzrecht beachten."
+    },
+    {
+        question: "3. Was ist der Unterschied zwischen B2B- und B2C-E-Commerce?",
+        answer: "B2B-E-Commerce richtet sich an Geschäftskunden (Business-to-Business) und fokussiert sich oft auf Großbestellungen, spezifische Preisstaffeln und individuelle Verträge. B2C-E-Commerce (Business-to-Consumer) zielt auf Endverbraucher ab, bietet meist Standardpreise und nutzt oft Marketingmaßnahmen wie Rabatte und Promotionen, um den Absatz zu fördern."
+    },
+    {
+        question: "4. Welche Rolle spielt das Customer Relationship Management (CRM) im E-Commerce?",
+        answer: "CRM-Systeme unterstützen die Verwaltung von Kundenbeziehungen und ermöglichen eine gezielte Ansprache durch Segmentierung und Personalisierung. Sie helfen, die Kundenbindung zu stärken, indem sie durch gezieltes Marketing, personalisierte Angebote und einheitliche Kommunikation ein positives Kundenerlebnis schaffen."
+    },
+    {
+        question: "5. Wie beeinflusst die Conversion Rate die Performance eines Online-Shops und wie kann sie berechnet werden?",
+        answer: "Die Conversion Rate misst den Prozentsatz der Website-Besucher, die eine gewünschte Aktion ausführen, z.B. einen Kauf. Sie wird berechnet als (Anzahl der Conversions / Anzahl der Besucher) x 100. Eine hohe Conversion Rate weist auf eine effiziente Website hin, die Besucher zu Kunden konvertiert."
+    },
+    {
+        question: "6. Was ist der Customer Lifetime Value (CLV) und wie wird er im E-Commerce berechnet?",
+        answer: "Der Customer Lifetime Value (CLV) ist der erwartete Gesamterlös eines Kunden über die Dauer der Kundenbeziehung. Er wird berechnet als Durchschnittlicher Bestellwert x Kaufhäufigkeit pro Jahr x Kundendauer in Jahren. Der CLV hilft, Marketingbudgets gezielt einzusetzen und langfristige Kundenbeziehungen zu bewerten."
+    },
+    {
+        question: "7. Welche Bedeutung hat das Omnichannel-Marketing im E-Commerce?",
+        answer: "Omnichannel-Marketing ermöglicht eine einheitliche Kundenerfahrung über mehrere Kanäle (z.B. Website, Social Media, physische Geschäfte) hinweg. Dies verbessert die Reichweite, fördert das Cross-Selling und bietet Kunden die Flexibilität, über ihren bevorzugten Kanal einzukaufen."
+    },
+    {
+        question: "8. Was sind die Unterschiede zwischen On-Page- und Off-Page-SEO?",
+        answer: "On-Page-SEO umfasst Maßnahmen, die auf der eigenen Website vorgenommen werden, wie Optimierung von Inhalten, Meta-Tags und Ladezeiten. Off-Page-SEO beinhaltet externe Maßnahmen, wie Backlinks von anderen Websites, um die Autorität und Sichtbarkeit der eigenen Website zu steigern."
+    },
+    {
+        question: "9. Welche Vorteile bietet Social Media Marketing für E-Commerce-Unternehmen?",
+        answer: "Social Media Marketing ermöglicht es E-Commerce-Unternehmen, Markenbekanntheit aufzubauen, durch gezieltes Targeting spezifische Zielgruppen anzusprechen, die Kundenbindung zu stärken und den Website-Traffic sowie die Conversion Rate durch interaktive Inhalte und Influencer-Kooperationen zu erhöhen."
+    },
+    {
+        question: "10. Was ist der Unterschied zwischen einem Marktplatz und einem eigenen Online-Shop?",
+        answer: "Ein eigener Online-Shop bietet volle Kontrolle über Marke und Kundenbeziehung, aber auch höhere Anfangskosten und Marketingaufwand. Ein Marktplatz (z.B. Amazon) ermöglicht schnellen Zugang zu einem großen Kundenstamm, setzt jedoch Gebühren und Vorgaben, die die Markenpräsentation und die Kundeninteraktion einschränken können."
+    },
+    {
+        question: "11. Welche Zahlungsmethoden sollten in einem Online-Shop angeboten werden?",
+        answer: "Wichtige Zahlungsmethoden sind Kreditkarte, PayPal, Kauf auf Rechnung, Sofortüberweisung und Lastschrift. Die Wahl der Zahlungsmethoden sollte sich an den Zielgruppenpräferenzen und der Benutzerfreundlichkeit orientieren, um Abbrüche im Kaufprozess zu vermeiden."
+    },
+    {
+        question: "12. Was ist Conversion Rate Optimization (CRO) und welche Methoden gibt es?",
+        answer: "CRO ist die Optimierung der Conversion Rate durch gezielte Maßnahmen. Methoden sind A/B-Testing, Heatmaps, Usability-Analysen und Personalisierung. Ziel ist es, das Nutzererlebnis zu verbessern und mehr Besucher zu Käufern zu machen."
+    },
+    {
+        question: "13. Welche rechtlichen Vorgaben der DSGVO betreffen die Datenverarbeitung im E-Commerce?",
+        answer: "Die DSGVO fordert von Unternehmen Transparenz und Zweckbindung bei der Datenerhebung, Datensicherheit und Rechte für Nutzer wie Auskunft und Löschung. Einwilligungen zur Datenverarbeitung müssen aktiv eingeholt und Datenschutzverletzungen innerhalb von 72 Stunden gemeldet werden."
+    },
+    {
+        question: "14. Welche Funktionen hat ein Enterprise Resource Planning (ERP)-System im E-Commerce?",
+        answer: "Ein ERP-System zentralisiert Daten und automatisiert Geschäftsprozesse wie Lagerhaltung, Einkauf, Buchhaltung und Bestellverwaltung. Es fördert die Effizienz und ermöglicht eine schnellere und präzisere Reaktion auf Bestellungen und Lieferanforderungen im E-Commerce."
+    },
+    {
+        question: "15. Was sind AGB und welche Inhalte sollten sie im Online-Handel abdecken?",
+        answer: "AGB (Allgemeine Geschäftsbedingungen) regeln Vertragsbedingungen zwischen Verkäufer und Käufer. Inhalte umfassen Regelungen zu Zahlung, Lieferung, Widerruf, Haftung und Datenschutz. AGB müssen klar und verständlich formuliert und auf der Website zugänglich sein."
+    },
+    {
+        question: "16. Welche KPIs sind im E-Commerce zur Erfolgsmessung wichtig?",
+        answer: "Wichtige KPIs sind:\n- Conversion Rate\n- Customer Acquisition Cost (CAC)\n- Customer Lifetime Value (CLV)\n- Warenkorbabbruchrate\n- Return on Investment (ROI). Diese Kennzahlen helfen, die Leistung des Shops und den Erfolg von Marketingmaßnahmen zu bewerten."
+    },
+    {
+        question: "17. Was ist der Unterschied zwischen SEO und SEA im E-Commerce?",
+        answer: "SEO (Suchmaschinenoptimierung) zielt auf organische Suchergebnisse ab und erfordert langfristige Maßnahmen, wie Keyword-Optimierung und Backlink-Aufbau. SEA (Suchmaschinenwerbung) ist bezahlte Werbung in Suchmaschinen, die sofortige Sichtbarkeit und Traffic generiert, jedoch Kosten verursacht."
+    },
+    {
+        question: "18. Welche Maßnahmen zur Risikominimierung bei Zahlungsausfällen gibt es im E-Commerce?",
+        answer: "Maßnahmen umfassen Bonitätsprüfungen, die Einschränkung unsicherer Zahlungsmethoden (z.B. Kauf auf Rechnung), den Einsatz von Zahlungsdienstleistern, die Betrugspräventionstechniken anwenden, und den Einsatz von Inkassounternehmen für offene Forderungen."
+    },
+    {
+        question: "19. Was versteht man unter einem Datenschutzbeauftragten und wann ist er erforderlich?",
+        answer: "Ein Datenschutzbeauftragter ist für die Einhaltung des Datenschutzes im Unternehmen verantwortlich und berät zur DSGVO-Compliance. In Deutschland ist er verpflichtend für Unternehmen mit mehr als 20 Personen, die regelmäßig personenbezogene Daten verarbeiten."
+    },
+    {
+        question: "20. Welche rechtlichen Anforderungen stellt die Impressumspflicht an Online-Shops?",
+        answer: "Ein Impressum muss Kontaktinformationen des Unternehmens, eine Vertretungsberechtigte Person, Handelsregisterinformationen und die USt-IdNr. (falls vorhanden) enthalten. Es dient der Transparenz und muss leicht zugänglich und vollständig auf der Website vorhanden sein."
+    },
+    {
+        question: "21. Welche Trends beeinflussen derzeit den E-Commerce?",
+        answer: "Wichtige Trends sind:\n- Personalisierung durch KI\n- Nachhaltigkeit und umweltfreundliche Produkte\n- Mobile Commerce (M-Commerce)\n- Voice Commerce\n- Nutzung von AR/VR für virtuelles Shopping. Diese Trends verbessern das Kundenerlebnis und stärken die Kundenbindung."
+    },
+    {
+        question: "22. Was sind die Vorteile von Influencer Marketing im E-Commerce?",
+        answer: "Influencer Marketing erhöht die Reichweite und Glaubwürdigkeit durch authentische Produktempfehlungen. Vorteile sind die direkte Ansprache der Zielgruppe, erhöhter Traffic auf der Website und eine Steigerung der Conversion Rate durch Empfehlungen vertrauenswürdiger Persönlichkeiten."
+    },
+    {
+        question: "23. Welche Maßnahmen der Customer Journey Optimization gibt es im E-Commerce?",
+        answer: "Customer Journey Optimization verbessert das Kundenerlebnis entlang der gesamten Reise. Maßnahmen umfassen eine optimierte Website-Navigation, personalisierte Produktempfehlungen, gezieltes Remarketing, eine vereinfachte Kaufabwicklung und nach dem Kauf Follow-up-Emails zur Kundenbindung."
+    },
+    {
+        question: "24. Was sind die wichtigsten Schritte zur Umsetzung einer erfolgreichen E-Mail-Marketing-Strategie?",
+        answer: "Wichtige Schritte sind Zielgruppensegmentierung, Erstellung relevanter Inhalte, Personalisierung der Ansprache, Einsatz von Automatisierung für gezielte Kampagnen und regelmäßiges Monitoring der Performance-Kennzahlen wie Öffnungs- und Klickraten zur Optimierung der E-Mail-Strategie."
+    },
+    {
+        question: "25. Welche Rolle spielt die Payment Card Industry Data Security Standard (PCI DSS) im E-Commerce?",
+        answer: "Der PCI DSS stellt Sicherheitsstandards für die Verarbeitung und Speicherung von Kreditkartendaten bereit. E-Commerce-Unternehmen, die Kartenzahlungen anbieten, müssen diese Standards einhalten, um die Sicherheit der Zahlungsdaten zu gewährleisten und Compliance-Risiken zu minimieren."
+    },
+    {
+        question: "26. Was versteht man unter Cross-Channel- und Multichannel-Marketing?",
+        answer: "Multichannel-Marketing nutzt verschiedene Kanäle (z.B. Web, Social Media) unabhängig voneinander. Cross-Channel-Marketing ermöglicht eine nahtlose Integration zwischen den Kanälen, z.B. durch die Verknüpfung von Online- und Offline-Daten für ein durchgängiges Kundenerlebnis."
+    },
+    {
+        question: "27. Wie wird der Customer Acquisition Cost (CAC) berechnet und warum ist er wichtig?",
+        answer: "Der CAC wird berechnet, indem die gesamten Marketing- und Vertriebskosten durch die Anzahl der gewonnenen Kunden geteilt werden. Ein niedriger CAC zeigt effiziente Kundenakquise und hilft, das Marketingbudget zu optimieren und gezielt Kunden zu gewinnen."
+    },
+    {
+        question: "28. Welche Funktionen und Vorteile bietet das Retargeting im Online-Marketing?",
+        answer: "Retargeting zeigt Besuchern, die den Shop verlassen haben, gezielte Werbung, um sie zur Rückkehr zu animieren. Vorteile sind die Erhöhung der Conversion Rate, kosteneffizientes Marketing und eine gezielte Ansprache potenzieller Kunden, die bereits Interesse gezeigt haben."
+    },
+    {
+        question: "29. Wie unterscheiden sich B2B- und B2C-Kundenbeziehungen im E-Commerce?",
+        answer: "B2B-Kundenbeziehungen basieren oft auf langfristigen Verträgen und größeren Auftragsvolumina. Der Entscheidungsprozess ist meist komplexer und mehrstufig. B2C-Kunden kaufen meist einmalig oder sporadisch, und Entscheidungen sind emotionaler und weniger formell."
+    },
+    {
+        question: "30. Was sind die Anforderungen an eine sichere Zahlungsabwicklung im E-Commerce?",
+        answer: "Anforderungen umfassen die Verschlüsselung von Daten durch SSL, PCI-DSS-Compliance bei Kreditkartenzahlungen, 3D-Secure-Verfahren, um Betrug zu verhindern, und die Nutzung sicherer Zahlungsanbieter zur Minimierung von Zahlungsrisiken."
+    },
+    {
+        question: "31. Welche Best Practices gibt es für die Produktpräsentation in einem Online-Shop?",
+        answer: "Best Practices umfassen qualitativ hochwertige Produktbilder, detaillierte und wahrheitsgemäße Beschreibungen, Kundenbewertungen zur Vertrauensförderung, eine klare und strukturierte Layout-Darstellung sowie einfache Filter- und Suchfunktionen, um die Benutzerfreundlichkeit zu erhöhen."
+    },
+    {
+        question: "32. Welche Faktoren beeinflussen die Wahl der Plattform im E-Commerce?",
+        answer: "Faktoren sind Skalierbarkeit, Benutzerfreundlichkeit, Kosten, Integrationsmöglichkeiten mit anderen Systemen (z.B. ERP, CRM), Sicherheit, Anpassungsfähigkeit an die Marke und die technischen Ressourcen des Unternehmens."
+    },
+    {
+        question: "33. Was ist das One-Stop-Shop (OSS)-Verfahren und wie vereinfacht es die Umsatzsteuer im E-Commerce?",
+        answer: "Das OSS-Verfahren ermöglicht es E-Commerce-Händlern, die Umsatzsteuer für grenzüberschreitende Verkäufe an EU-Verbraucher zentral zu melden und abzuführen. Es vereinfacht die Steuerpflicht, da Händler sich nur in einem EU-Land für die Umsatzsteuer registrieren müssen."
+    },
+    {
+        question: "34. Welche Maßnahmen verbessern die Benutzerfreundlichkeit (Usability) eines Online-Shops?",
+        answer: "Maßnahmen umfassen ein intuitives Design, klare Call-to-Actions, schnelle Ladezeiten, mobile Optimierung, einfache Navigation, informative Produktbeschreibungen, sowie ein transparenter und unkomplizierter Checkout-Prozess."
+    },
+    {
+        question: "35. Welche rechtlichen Besonderheiten gibt es bei der Verwendung von Influencern im Marketing?",
+        answer: "Influencer müssen Kooperationen klar als Werbung kennzeichnen, um Schleichwerbung zu vermeiden. Unternehmen müssen darauf achten, dass beworbene Produkte den rechtlichen Standards entsprechen und Werbung klar als solche deklariert wird, um rechtliche Konsequenzen zu vermeiden."
+    },
+    {
+        question: "36. Was sind Buyer Personas und wie helfen sie im E-Commerce?",
+        answer: "Buyer Personas sind fiktive Profile typischer Kunden basierend auf Daten und Analysen. Sie helfen, die Zielgruppe besser zu verstehen und Marketingmaßnahmen sowie Produktangebote präzise auf die Bedürfnisse und Präferenzen der Kunden abzustimmen."
+    },
+    {
+        question: "37. Welche gesetzlichen Vorschriften gelten für die Datenspeicherung im E-Commerce?",
+        answer: "Die DSGVO fordert, dass Daten nur zweckgebunden und so lange wie nötig gespeichert werden. Kunden haben das Recht auf Auskunft und Löschung ihrer Daten. Bei Verstößen drohen Bußgelder, daher ist eine DSGVO-konforme Datenverarbeitung entscheidend."
+    },
+    {
+        question: "38. Welche Rolle spielt das Widerrufsrecht im Fernabsatz und welche Fristen gelten?",
+        answer: "Das Widerrufsrecht ermöglicht Verbrauchern, innerhalb von 14 Tagen den Kaufvertrag zu widerrufen. Der Händler muss über das Widerrufsrecht informieren, andernfalls verlängert sich die Frist. Einige Produkte, wie versiegelte Waren, sind vom Widerrufsrecht ausgenommen."
+    },
+    {
+        question: "39. Welche Bedeutung hat die Ladezeitoptimierung für die Conversion Rate eines Online-Shops?",
+        answer: "Eine schnelle Ladezeit verbessert das Benutzererlebnis und verringert die Absprungrate. Jede Sekunde, die eine Website länger lädt, kann die Conversion Rate deutlich senken, da Besucher ungeduldig werden und möglicherweise den Shop verlassen."
+    },
+    {
+        question: "40. Welche Vorteile bietet die Nutzung von Progressive Web Apps (PWAs) im E-Commerce?",
+        answer: "PWAs kombinieren die Vorteile von Apps und Websites, z.B. Offline-Nutzung, Push-Benachrichtigungen und hohe Performance. Sie bieten eine kostengünstige Alternative zur nativen App und verbessern das Nutzererlebnis durch schnellen Zugriff und geringe Ladezeiten."
+    },
+    {
+        question: "41. Welche rechtlichen Informationen müssen in den AGB enthalten sein?",
+        answer: "Die AGB müssen Angaben zu Vertragsgegenstand, Lieferung, Bezahlung, Rücktrittsrecht, Haftung und Gerichtsstand enthalten. Die AGB sollten klar und verständlich formuliert sein, da unklare Klauseln rechtlich unwirksam sein können."
+    },
+    {
+        question: "42. Welche Schutzmaßnahmen müssen Online-Händler für personenbezogene Daten treffen?",
+        answer: "Online-Händler müssen Daten durch SSL-Verschlüsselung sichern, Zugriffe auf personenbezogene Daten beschränken und sichere Passwörter verwenden. Regelmäßige Sicherheitsupdates und die Schulung des Personals gehören ebenfalls zu den Maßnahmen zur Datensicherheit."
+    },
+    {
+        question: "43. Wie kann eine Retargeting-Kampagne erfolgreich gestaltet werden?",
+        answer: "Eine erfolgreiche Retargeting-Kampagne nutzt zielgerichtete Anzeigen, um Nutzer nach ihrem Besuch erneut anzusprechen. Wichtige Elemente sind relevante Inhalte, die Anpassung der Anzeigen an das Nutzerverhalten und die Optimierung der Frequenz, um Überwerbung zu vermeiden."
+    },
+    {
+        question: "44. Was versteht man unter Upselling und Cross-Selling und wie wirken sie im E-Commerce?",
+        answer: "Upselling ist der Versuch, dem Kunden eine teurere Variante des Produkts anzubieten. Cross-Selling bietet dem Kunden ergänzende Produkte zum Hauptprodukt an. Beide Methoden erhöhen den durchschnittlichen Warenkorbwert und fördern die Kundenbindung."
+    },
+    {
+        question: "45. Welche Schritte umfasst die Planung einer SEO-Strategie?",
+        answer: "Die Planung umfasst Keyword-Recherche, Content-Optimierung, technische Optimierung (z.B. Ladezeiten), On-Page-SEO (z.B. Meta-Tags), Off-Page-SEO (z.B. Backlinks), und kontinuierliches Monitoring zur Analyse und Anpassung der Strategie."
+    },
+    {
+        question: "46. Warum ist das Retourenmanagement ein wichtiger Aspekt im E-Commerce?",
+        answer: "Ein effektives Retourenmanagement reduziert Kosten und stärkt die Kundenzufriedenheit. Schnelle und unkomplizierte Rückgabeprozesse, transparente Richtlinien und klare Kommunikation fördern das Vertrauen der Kunden und verbessern die Kundenbindung."
+    }
+];
+
+    // Funktion zum Mischen des Arrays (Fisher-Yates Shuffle)
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    // Variablen
+    let remainingCards = shuffle([...cards]); // Kopie des Arrays erstellen und mischen
+    let currentCard = null;
+    let showingQuestion = true;
+
+    const cardDiv = document.getElementById('card');
+    const cardContent = document.getElementById('card-content');
+    const buttonsDiv = document.getElementById('buttons');
+    const knowButton = document.getElementById('know-button');
+    const dontKnowButton = document.getElementById('dont-know-button');
+    const remainingCountSpan = document.getElementById('remaining-count');
+    const backButton = document.getElementById('back-button');
+
+    // Funktion zum Aktualisieren des Counters
+    function updateCounter() {
+        remainingCountSpan.textContent = remainingCards.length;
+    }
+
+    function showNextCard() {
+        if (remainingCards.length === 0) {
+            cardContent.innerHTML = "<strong>Herzlichen Glückwunsch!</strong><br>Sie haben alle Karteikarten korrekt beantwortet.";
+            buttonsDiv.style.display = 'none';
+            remainingCountSpan.textContent = 0;
+            return;
+        }
+
+        currentCard = remainingCards[0];
+        showingQuestion = true;
+        cardContent.innerHTML = "<strong>Frage:</strong><br>" + currentCard.question;
+        buttonsDiv.style.display = 'none';
+        updateCounter();
+    }
+
+    cardContent.addEventListener('click', function() {
+        if (!currentCard) {
+            showNextCard();
+            return;
+        }
+
+        if (showingQuestion) {
+            cardContent.innerHTML = "<strong>Antwort:</strong><br>" + currentCard.answer;
+            showingQuestion = false;
+            buttonsDiv.style.display = 'block';
+        }
+    });
+
+    knowButton.addEventListener('click', function() {
+        // Karteikarte aus dem Stapel entfernen
+        remainingCards.shift();
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    dontKnowButton.addEventListener('click', function() {
+        // Karteikarte ans Ende des Stapels verschieben
+        remainingCards.push(remainingCards.shift());
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    backButton.addEventListener('click', function() {
+        // Zurück zur vorherigen Seite navigieren
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Initiale Anzeige des Counters
+    updateCounter();
+
+    // Start mit der ersten Frage
+    cardContent.innerHTML = "Klicken Sie hier, um die erste Frage anzuzeigen.";
+</script>
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Karteikartenprogramm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            position: relative; /* Für die Positionierung des Counters */
+            background-color: #f5f5f5;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        #back-button {
+            position: absolute;
+            left: 0;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        #back-button:hover {
+            background-color: #0056b3;
+        }
+        #card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            text-align: left;
+            font-size: 1.1em;
+            line-height: 1.5em;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #card-content {
+            cursor: pointer;
+            white-space: pre-line; /* Ermöglicht Zeilenumbrüche bei \n */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #buttons button {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            border: none;
+            color: #fff;
+        }
+        #know-button {
+            background-color: #28a745;
+        }
+        #know-button:hover {
+            background-color: #218838;
+        }
+        #dont-know-button {
+            background-color: #dc3545;
+        }
+        #dont-know-button:hover {
+            background-color: #c82333;
+        }
+        /* Stil für den verbleibenden Karten-Counter */
+        #counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            z-index: 1000; /* Sicherstellen, dass der Counter oben bleibt */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button id="back-button">Zurück</button>
+    <h1>Karteikartenprogramm</h1>
+</header>
+
+<div id="card">
+    <div id="card-content">Klicken Sie hier, um die erste Frage anzuzeigen.</div>
+    <div id="buttons" style="display: none;">
+        <button id="dont-know-button">✗ Ich wusste es nicht</button>
+        <button id="know-button">✓ Ich wusste es</button>
+    </div>
+</div>
+
+<!-- Anzeige für verbleibende Karteikarten -->
+<div id="counter">Verbleibende Karten: <span id="remaining-count">0</span></div>
+
+<script>
+    // Fragen und Antworten
+    const cards = [
+    {
+        question: "Was ist der ROPO-Effekt?",
+        answer: "Der ROPO-Effekt (Research Online, Purchase Offline) beschreibt das Kundenverhalten, bei dem Verbraucher online recherchieren, aber den Kauf im stationären Handel abschließen."
+    },
+    {
+        question: "Was versteht man unter dem Showroom-Effekt?",
+        answer: "Der Showroom-Effekt beschreibt das Kundenverhalten, bei dem Verbraucher Produkte im stationären Handel anschauen und ausprobieren, aber den Kauf anschließend online abschließen, oft aufgrund besserer Preise oder Bequemlichkeit."
+    },
+    {
+        question: "Was sind interaktive Touchpoints und welche Rolle spielen sie im Customer Journey?",
+        answer: "Interaktive Touchpoints sind Berührungspunkte, an denen Unternehmen und Kunden interagieren, z.B. über Websites, Apps, soziale Medien, POS und mehr. Sie sind zentral im Customer Journey, um Kundenbedürfnisse zu verstehen und gezielte Kommunikation zu betreiben."
+    },
+    {
+        question: "Was ist ROAS und wie wird er berechnet?",
+        answer: "ROAS (Return on Advertising Spend) misst die Effizienz einer Werbekampagne und gibt das Verhältnis der erzielten Einnahmen zu den Werbekosten an. Ein ROAS von 300 % bedeutet z.B., dass für jeden investierten Euro drei Euro Umsatz generiert wurden."
+    },
+    {
+        question: "Wie funktioniert die Vorwärtskalkulation?",
+        answer: "Die Vorwärtskalkulation startet beim Brutto-Listeneinkaufspreis und zieht Rabatte, Boni, Skonti und andere Kosten ab, um bis zum Brutto-Listenverkaufspreis zu gelangen. So lässt sich der Preis schrittweise vom Einkauf bis zum Verkauf kalkulieren."
+    },
+    {
+        question: "Was ist Dynamic Pricing?",
+        answer: "Dynamic Pricing ist eine Preisstrategie, bei der Preise in Echtzeit an Faktoren wie Nachfrage, Angebot oder Tageszeit angepasst werden. Ziel ist es, den Umsatz zu maximieren, indem stets der optimale Preis festgelegt wird."
+    },
+    {
+        question: "Was sind kurzfristige und langfristige Preisuntergrenzen?",
+        answer: "Die kurzfristige Preisuntergrenze deckt nur die variablen Kosten ab, wohingegen die langfristige Preisuntergrenze alle Kosten deckt und sicherstellt, dass das Unternehmen langfristig profitabel arbeitet."
+    },
+    {
+        question: "Was sind die 4P im Marketing?",
+        answer: "Produkt, Preis, Platzierung, Promotion – sie bestimmen, wie ein Produkt erfolgreich im Markt positioniert wird."
+    },
+    {
+        question: "Was ist das Magische Dreieck im Projektmanagement?",
+        answer: "Das Magische Dreieck zeigt die Beziehung zwischen Zeit, Kosten und Qualität. Änderungen in einem Bereich erfordern meist Anpassungen in den anderen, um Projektziele zu erreichen."
+    },
+    {
+        question: "Was ist ein Gantt-Diagramm?",
+        answer: "Ein Gantt-Diagramm visualisiert den Projektzeitplan mit Balken, die den Fortschritt einzelner Aufgaben über die Projektlaufzeit darstellen."
+    },
+    {
+        question: "Was ist der Unterschied zwischen Produktdifferenzierung und Produktdiversifikation?",
+        answer: "Produktdifferenzierung erweitert die Sortimentstiefe, indem bestehende Produkte angepasst werden, während Produktdiversifikation die Sortimentsbreite durch Einführung neuer Produktgruppen erhöht."
+    },
+    {
+        question: "Was ist SMART?",
+        answer: "SMART-Ziele sind spezifisch, messbar, attraktiv, realistisch und terminiert, um eine klare Zielerreichung sicherzustellen."
+    },
+    {
+        question: "Was ist ein Lastenheft?",
+        answer: "Ein Lastenheft beschreibt Anforderungen und Erwartungen des Auftraggebers an ein Projekt und dient als Grundlage für die Umsetzung durch den Auftragnehmer."
+    },
+    {
+        question: "Was unterscheidet agiles von klassischem Projektmanagement?",
+        answer: "Klassisches Projektmanagement ist linear und phasenbasiert, während agiles Projektmanagement iterativ und flexibel ist und sich kontinuierlich an Änderungen anpasst."
+    },
+    {
+        question: "Was ist eine SWOT-Analyse?",
+        answer: "Eine SWOT-Analyse bewertet Stärken, Schwächen, Chancen und Bedrohungen, um strategische Positionen zu identifizieren und fundierte Entscheidungen zu treffen."
+    },
+    {
+        question: "Was ist eine Nutzwertanalyse?",
+        answer: "Die Nutzwertanalyse bewertet Alternativen anhand gewichteter Kriterien, um Entscheidungen wie Produktwahl oder Lieferantenauswahl zu erleichtern."
+    },
+    {
+        question: "Was sind Push- und Pull-Kanäle im Marketing?",
+        answer: "Push-Kanäle senden Botschaften aktiv an Kunden, während Pull-Kanäle Kunden anziehen, die aktiv nach Informationen oder Produkten suchen."
+    },
+    {
+        question: "Was bedeutet die Liquidität 1., 2. und 3. Grades?",
+        answer: "Liquidität 1. Grades deckt kurzfristige Verpflichtungen durch Zahlungsmittel, Liquidität 2. Grades schließt Forderungen ein, und Liquidität 3. Grades berücksichtigt auch Vorräte."
+    },
+    {
+        question: "Was ist Category Management?",
+        answer: "Category Management behandelt Produktgruppen als eigenständige Einheiten, die auf Kundenbedürfnisse optimiert werden, um den Umsatz zu steigern."
+    },
+    {
+        question: "Wie werden die Deckungsbeiträge DB1, DB2 und DB3 berechnet?",
+        answer: "DB1 = Umsatz - variable Kosten, DB2 = DB1 - produktbezogene Fixkosten, DB3 = DB2 - bereichsbezogene Fixkosten. Jeder Deckungsbeitrag zeigt, wie viel zur Deckung weiterer Kosten oder zum Gewinn beiträgt."
+    },
+    {
+        question: "Was ist der Customer Lifetime Value (CLV)?",
+        answer: "Der CLV zeigt den erwarteten Umsatz, den ein Kunde während seiner Geschäftsbeziehung generiert, berechnet als Bestellwert x Kaufhäufigkeit x Kundendauer."
+    },
+    {
+        question: "Was sind die verschiedenen Targeting-Methoden?",
+        answer: "Wichtige Methoden sind demografisches, geografisches, psychografisches, verhaltensorientiertes und soziales Targeting, die je nach Kundenmerkmalen und Verhaltensdaten angewendet werden."
+    },
+    {
+        question: "Was ist eine Landingpage und welche Funktion hat sie?",
+        answer: "Eine Landingpage ist eine gezielt gestaltete Seite für spezifische Conversions, wie z.B. Anmeldungen oder Käufe, mit klarem Call-to-Action und ohne ablenkende Navigation."
+    },
+    {
+        question: "Was ist die Customer Acquisition Cost (CAC)?",
+        answer: "CAC gibt an, wie viel ein Unternehmen im Schnitt ausgibt, um einen neuen Kunden zu gewinnen, berechnet als Marketing- und Vertriebskosten geteilt durch die Anzahl neuer Kunden."
+    },
+    {
+        question: "Was ist die Kosten-Umsatz-Relation (KUR)?",
+        answer: "Die KUR gibt das Verhältnis zwischen Kosten und Umsätzen an und hilft, die Effizienz von Marketing- oder Werbemaßnahmen zu bewerten."
+    },
+    {
+        question: "Was sind internes und externes Rechnungswesen?",
+        answer: "Internes Rechnungswesen (Kostenrechnung) dient der Planung und Kontrolle im Unternehmen, externes Rechnungswesen (Finanzbuchhaltung) dient der Information für externe Stakeholder."
+    },
+    {
+        question: "Was ist Benchmarking und welche Arten gibt es?",
+        answer: "Benchmarking vergleicht Leistungen mit Best Practices, um Verbesserungen zu identifizieren. Es umfasst internes, externes, funktionales und Wettbewerbs-Benchmarking."
+    },
+    {
+        question: "Was ist SEO und welche Maßnahmen umfasst es?",
+        answer: "SEO umfasst die Optimierung für Suchmaschinen durch Keywords, On-Page-Optimierung, technische SEO, hochwertigen Content und Backlinks, um das Ranking in den Suchergebnissen zu verbessern."
+    },
+    {
+        question: "Was ist Social Media Marketing und welche Vorteile bietet es?",
+        answer: "Social Media Marketing nutzt Plattformen wie Facebook und Instagram, um Reichweite zu erhöhen, Kunden zu binden und kosteneffizient Zielgruppen anzusprechen."
+    }
+];
+
+
+    // Funktion zum Mischen des Arrays (Fisher-Yates Shuffle)
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    // Variablen
+    let remainingCards = shuffle([...cards]); // Kopie des Arrays erstellen und mischen
+    let currentCard = null;
+    let showingQuestion = true;
+
+    const cardDiv = document.getElementById('card');
+    const cardContent = document.getElementById('card-content');
+    const buttonsDiv = document.getElementById('buttons');
+    const knowButton = document.getElementById('know-button');
+    const dontKnowButton = document.getElementById('dont-know-button');
+    const remainingCountSpan = document.getElementById('remaining-count');
+    const backButton = document.getElementById('back-button');
+
+    // Funktion zum Aktualisieren des Counters
+    function updateCounter() {
+        remainingCountSpan.textContent = remainingCards.length;
+    }
+
+    function showNextCard() {
+        if (remainingCards.length === 0) {
+            cardContent.innerHTML = "<strong>Herzlichen Glückwunsch!</strong><br>Sie haben alle Karteikarten korrekt beantwortet.";
+            buttonsDiv.style.display = 'none';
+            remainingCountSpan.textContent = 0;
+            return;
+        }
+
+        currentCard = remainingCards[0];
+        showingQuestion = true;
+        cardContent.innerHTML = "<strong>Frage:</strong><br>" + currentCard.question;
+        buttonsDiv.style.display = 'none';
+        updateCounter();
+    }
+
+    cardContent.addEventListener('click', function() {
+        if (!currentCard) {
+            showNextCard();
+            return;
+        }
+
+        if (showingQuestion) {
+            cardContent.innerHTML = "<strong>Antwort:</strong><br>" + currentCard.answer;
+            showingQuestion = false;
+            buttonsDiv.style.display = 'block';
+        }
+    });
+
+    knowButton.addEventListener('click', function() {
+        // Karteikarte aus dem Stapel entfernen
+        remainingCards.shift();
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    dontKnowButton.addEventListener('click', function() {
+        // Karteikarte ans Ende des Stapels verschieben
+        remainingCards.push(remainingCards.shift());
+        buttonsDiv.style.display = 'none';
+        showNextCard();
+    });
+
+    backButton.addEventListener('click', function() {
+        // Zurück zur vorherigen Seite navigieren
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Initiale Anzeige des Counters
+    updateCounter();
+
+    // Start mit der ersten Frage
+    cardContent.innerHTML = "Klicken Sie hier, um die erste Frage anzuzeigen.";
+</script>
+
+</body>
+</html>

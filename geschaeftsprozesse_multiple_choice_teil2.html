@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Commerce Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .options, .matching-options, .matching-items {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li, .matching-items li {
+            margin-bottom: 10px;
+        }
+        .options li label {
+            display: block;
+            cursor: pointer;
+        }
+        .correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        #progress {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        #submit-answer {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        #restart, #back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+        .matching-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .matching-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .matching-row input[type="text"] {
+            width: 50px;
+            margin-right: 10px;
+        }
+        .matching-options {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <h1>E-Commerce Quiz</h1>
+    <div id="question-container">
+        <!-- Die Frage wird hier eingefügt -->
+    </div>
+    <div id="progress">
+        Frage <span id="current-question-number">1</span> von <span id="total-questions">28</span>
+    </div>
+    <div id="result"></div>
+    <button id="submit-answer" style="display: none;">Antwort absenden</button>
+    <button id="restart" style="display: none;">Quiz neu starten</button>
+    <button id="back-button">Zurück</button>
+</div>
+
+<script>
+    // Fragen mit verschiedenen Typen
+    const questions = [
+        {
+            question: "1. Welches ist die Hauptfunktion eines Balkendiagramms (Gantt-Chart) bei der Darstellung der Einführung der Geschäftseinheit 'Young Generation'?",
+            type: "single",
+            options: [
+                "Es eignet sich zur zeitlichen Koordination von Projekten, z. B. in der Bau- oder Urlaubsplanung.",
+                "Es zeigt grafisch die funktionalen Abhängigkeiten einzelner Vorgänge nach DIN 69 900.",
+                "Es ist ein Instrument der Aufbauorganisation und zeigt den hierarchischen Aufbau des Unternehmens.",
+                "Es stellt die Veränderung von Daten innerhalb eines Programms in tabellarischer Form dar.",
+                "Es ist ein Instrument der Kreativtechnik und dient als Gedankenlandkarte."
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "2. Was ist der wesentliche Unterschied zwischen Routinearbeit und Projektarbeit, den Sie den Auszubildenden erklären?",
+            type: "single",
+            options: [
+                "Bei der Projektarbeit ändert sich immer nur die Ablauforganisation.",
+                "Projektarbeit beschäftigt sich mit bekannten Abläufen, eingespielten Teams und festem Budget.",
+                "Projektarbeit ist immer Teil der Routinearbeit eines Mitarbeiters.",
+                "Bei Routinearbeit ändert sich die Organisationsform nie.",
+                "Projektarbeit ist eine zeitlich befristete komplexe Aufgabe mit definiertem Start und Endpunkt."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "3. Wie beschreibt man das Modell des Magischen Dreiecks im Projektmanagement richtig?",
+            type: "single",
+            options: [
+                "Es wurden 1967 die Ziele Zeit, Kosten und Sachinhalt/Qualität festgelegt.",
+                "Es beschreibt ein volkswirtschaftliches System mit Zielen wie Wirtschaftswachstum und Preisstabilität.",
+                "Es bezeichnet die Ziele Rentabilität, Sicherheit und Liquidität bei Vermögensanlagen.",
+                "Es stellt die Parameter Zeit, Kosten und Sachinhalt/Qualität für den Projekterfolg dar.",
+                "Es wurde um den Parameter Nachhaltigkeit in der ISO 9001 erweitert."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "4. Welches Instrument gehört nicht zu den traditionellen '4 P' des Marketing-Mix?",
+            type: "single",
+            options: [
+                "Process",
+                "Product",
+                "Price",
+                "Place",
+                "Promotion"
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "5. Welcher Unterpunkt gehört zur Produkt-/Sortimentspolitik im Rahmen der Weiterentwicklung des Sortiments?",
+            type: "single",
+            options: [
+                "Werbung",
+                "Category Management",
+                "Dropshipping",
+                "Indirekter Absatzweg",
+                "Direkter Absatzweg"
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "6. Wie wird die kleinste Einheit des Sortiments in der Sortimentspyramide bezeichnet?",
+            type: "single",
+            options: [
+                "Aktionssortiment",
+                "Warengruppe",
+                "Sorte/Variante",
+                "Kernsortiment",
+                "Warenart"
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "7. Was versteht man unter Content-Marketing?",
+            type: "single",
+            options: [
+                "Eine besondere Form des Dropshipping.",
+                "Eine Form der Werbung und Teil der Preispolitik.",
+                "Reine Werbung mittels Werbeanzeigen in Suchmaschinen.",
+                "Eine Marketingtechnik, die relevante Inhalte kreiert, um Interessenten zu gewinnen.",
+                "Eine sekundäre Online-Marketing-Methode im Display-Netzwerk von Google."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "8. Welche Information gibt die Kennzahl Wirtschaftlichkeit im Hinblick auf die Geschäftseinheit 'Young Generation'?",
+            type: "single",
+            options: [
+                "Sie gibt die 'Ab-Verzinsung' des eingesetzten Kapitals an.",
+                "Sie zeigt die 'Verzinsung' der Investition (Kapitalrentabilität) an.",
+                "Sie zeigt den Gewinn im Verhältnis zum Umsatz an.",
+                "Sie ist Ausdruck der 'Verzinsung' des eingesetzten Eigenkapitals.",
+                "Sie zeigt an, wie effizient die Implementierung ist, erhöht sich bei steigenden Erlösen oder sinkenden Kosten."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "9. Welche Formel verwendet die Globetrader GmbH als Hilfsmittel zur Formulierung ihrer Marketingziele?",
+            type: "single",
+            options: [
+                "KOALA",
+                "AIDA",
+                "SMART",
+                "ALPEN",
+                "KEC"
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "10. Welcher Sachverhalt zum Deckungsbeitrag ist richtig beschrieben?",
+            type: "single",
+            options: [
+                "Der Deckungsbeitrag ist die Differenz zwischen Erlösen und variablen Kosten und trägt zur Deckung der Fixkosten bei.",
+                "Der Deckungsbeitrag ist die Differenz zwischen Erlösen und fixen Kosten und trägt zur Deckung der variablen Kosten bei.",
+                "Er sinkt mit steigender Absatzmenge und leistet einen größeren Beitrag zur Deckung der variablen Kosten.",
+                "Der Deckungsbeitrag entspricht dem Rohgewinn.",
+                "Der Deckungsbeitrag ist stets positiv."
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "11. Welche Kostenart gehört nicht zu den Fixkosten?",
+            type: "single",
+            options: [
+                "Lineare Abschreibungen",
+                "Treibstoffe für den betriebseigenen Fuhrpark",
+                "Feste Grundlöhne",
+                "Miete und Pacht",
+                "Leasingkosten für IT-Systeme"
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "12. Was beschreibt der Begriff Customer Journey im Zusammenhang mit der Analyse von Nutzerverhalten im Online-Shop?",
+            type: "single",
+            options: [
+                "Ermittlung des Absprungpunkts im Online-Shop.",
+                "Herkunft nach verwendeten Browsern.",
+                "Ermittlung des Einsprungpunkts im Online-Shop.",
+                "Das Bewegungsprofil des Kunden auf dem Weg zur Kaufentscheidung.",
+                "Die Verweildauer des Kunden auf der Landing Page pro Besuch."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "13. In einem Analytics-Programm können 'Zielvorhaben' eingestellt werden. Welcher Begriff beschreibt kein solches Zielvorhaben?",
+            type: "single",
+            options: [
+                "Kosten",
+                "Session-Dauer",
+                "Ziel-URL",
+                "Seiten pro Sitzung",
+                "Ereignis/Event"
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "14. Bringen Sie die folgenden Schritte eines typischen Conversion-Funnels der Globetrader GmbH in die richtige Reihenfolge!",
+            type: "matching",
+            options: [
+                { number: "1", text: "Suchbegriff eingeben" },
+                { number: "2", text: "Filterkriterien auswählen" },
+                { number: "3", text: "Produktvariante auswählen" },
+                { number: "4", text: "Lieferanschrift eingeben" },
+                { number: "5", text: "Zahlungspflichtig bestellen" }
+            ],
+            items: [
+                "Zahlungspflichtig bestellen",
+                "Produktvariante auswählen",
+                "Suchbegriff eingeben",
+                "Lieferanschrift eingeben",
+                "Filterkriterien auswählen"
+            ],
+            correctAnswers: [5,3,1,4,2] // Reihenfolge der Antworten entsprechend der items
+        },
+        {
+            question: "15. Welcher Sachverhalt trifft zu, wenn gedruckte Kataloge zusätzlich zum Online-Shop verwendet werden?",
+            type: "single",
+            options: [
+                "Der Katalog ist ein zusätzliches Werbemittel und muss in der Warendisposition nicht berücksichtigt werden.",
+                "Kosten entstehen für den Händler ausschließlich bei einer Bestellung.",
+                "Gedruckte Werbung ist ein verbindliches Angebot, und Bestellungen müssen angenommen werden.",
+                "Der Händler darf den Katalog an alle Kunden verschicken, solange diese nicht aktiv widersprochen haben.",
+                "Bilder aus dem Online-Shop reichen in Qualität und Auflösung für den Druck regelmäßig aus."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "16. Was bedeutet 'repräsentativ', wenn der Vertriebsleiter eine repräsentative Menge von 1.000 Adressen selektieren möchte?",
+            type: "single",
+            options: [
+                "Die Kunden müssen zu gleichen Teilen Männer und Frauen sein.",
+                "Die Kunden müssen alle in gleicher Höhe bestellt haben.",
+                "Die Kunden müssen in ihrer Verteilung der Gesamtmenge aller Kunden entsprechen.",
+                "Die Kunden müssen einem gewissen Schönheitsideal entsprechen.",
+                "Die Kunden müssen den Idealtypus eines profitablen Kunden repräsentieren."
+            ],
+            correctAnswer: [2]
+        },
+        {
+            question: "17. Sie sollen die Artikel im Rahmen einer ABC-Analyse nach Umsatzanteilen gruppieren. Ordnen Sie die Artikel den Gruppen A, B und C zu!",
+            type: "matching",
+            options: [
+                { number: "A", text: "Hoher Umsatzanteil" },
+                { number: "B", text: "Mittlerer Umsatzanteil" },
+                { number: "C", text: "Geringer Umsatzanteil" }
+            ],
+            items: [
+                "Tages-Rucksäcke: 15,85%",
+                "Trekking-Rucksäcke: 38,02%",
+                "Touren-Rucksäcke: 28,61%",
+                "Laptop-Rucksäcke: 13,33%",
+                "Foto-Rucksäcke: 2,04%",
+                "Fahrrad-Rucksäcke: 2,15%"
+            ],
+            correctAnswers: ["B","A","A","B","C","C"]
+        },
+        {
+            question: "18. Ordnen Sie die Abrechnungsmodelle im Affiliate-Marketing den entsprechenden Beschreibungen zu!",
+            type: "matching",
+            options: [
+                { number: "1", text: "CPO - Cost per Order" },
+                { number: "2", text: "CPL - Cost per Lead" },
+                { number: "3", text: "CPC - Cost per Click" },
+                { number: "4", text: "CPM - Cost per Mille" },
+                { number: "5", text: "Lifetime Vergütung" }
+            ],
+            items: [
+                "Man erhält regelmäßige Provisionen, solange geworbene Kunden Umsätze generieren.",
+                "Der Werbepartner bezahlt pro Klick auf ein Werbemittel.",
+                "Die Zahlung erfolgt für die Kontaktaufnahme eines Nutzers, nicht für einen Verkauf.",
+                "Kosten eines getätigten Verkaufs werden in einer Bestellung angegeben.",
+                "Der Werbepartner bezahlt pro erfolgter vereinbarter Conversion (z. B. Bestellung)."
+            ],
+            correctAnswers: [5,3,2,1,1]
+        },
+        {
+            question: "19. Bei welchem Abrechnungsmodell im Affiliate-Marketing liegt das Risiko hauptsächlich beim Affiliate?",
+            type: "single",
+            options: [
+                "Cost per Click",
+                "Cost per Lead",
+                "Cost per Mille",
+                "Cost per Order",
+                "Lifetime Vergütung"
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "20. Welche betriebswirtschaftliche Ursache könnte eine deutlich geringere Liquidität 2. Grades im Vergleich zum Vorjahr haben?",
+            type: "single",
+            options: [
+                "Die langfristigen Verbindlichkeiten haben sich verringert.",
+                "Es sind mehr Forderungen aus Lieferungen und Leistungen ausgewiesen.",
+                "Die Bankguthaben sind gestiegen.",
+                "Die Verbindlichkeiten aus Lieferungen und Leistungen sind gestiegen.",
+                "Das Eigenkapital ist gestiegen."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "21. Welches Controlling-Instrument liegt einer Übersicht von Verkaufszahlen im Vergleich zu Planzahlen zugrunde?",
+            type: "single",
+            options: [
+                "Soll-Ist-Vergleich",
+                "Berichtswesen",
+                "Kennzahlensystem",
+                "Budgetierung",
+                "Renditenvergleich"
+            ],
+            correctAnswer: [0]
+        },
+        {
+            question: "22. Wie ermitteln Sie die kurzfristige Preisuntergrenze mithilfe der Deckungsbeitragsrechnung?",
+            type: "single",
+            options: [
+                "Indem Sie alle Einzelkosten eines Artikels ermitteln.",
+                "Indem Sie alle Gemeinkosten eines Artikels ermitteln.",
+                "Indem Sie alle fixen Kosten eines Artikels ermitteln.",
+                "Indem Sie alle variablen Kosten eines Artikels ermitteln.",
+                "Indem Sie alle Stückkosten eines Artikels ermitteln."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "23. Welche Aussage über die Einführung einer App mit Werbemaßnahmen und dem Abrechnungsverfahren Cost per Click (CPC) trifft zu?",
+            type: "single",
+            options: [
+                "CPC bezieht sich nicht auf die Abrechnung, sondern auf die Klickrate innerhalb der App.",
+                "Je häufiger in der App geklickt wird, desto mehr muss an den Entwickler gezahlt werden.",
+                "CPC ist eine Abrechnungsmethode, die nur bei Lastschriftverfahren eingesetzt wird.",
+                "CPC bedeutet, dass pro Klick auf ein Werbemittel abgerechnet wird.",
+                "Durch CPC spart man sich Inkassokosten."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "24. Was beschreibt die Bounce Rate im Kontext von Web Analytics?",
+            type: "single",
+            options: [
+                "Sie legt fest, welche Funktionen des Web-Shops dem Nutzer zugänglich gemacht werden.",
+                "Sie ist ein erfolgsabhängiges Abrechnungsverfahren im Online-Marketing.",
+                "Sie beschreibt den Wert eines Kunden unter Berücksichtigung zukünftiger Aktionen.",
+                "Sie zeigt, wie Investitionen in die Kundenbetreuung zu höheren Kundeneinzahlungen führen.",
+                "Sie ist eine Kennzahl, die angibt, wie viele Nutzer die Website betreten und ohne weitere Aktion wieder verlassen."
+            ],
+            correctAnswer: [4]
+        },
+        {
+            question: "25. Welche Alternative beschreibt den Unterschied zwischen qualitativen und quantitativen Merkmalen richtig?",
+            type: "single",
+            options: [
+                "Beispiele für quantitative Merkmale: Nutzerzufriedenheit, Nutzererfahrung.",
+                "Beispiele für qualitative Merkmale: Nutzerzufriedenheit, Nutzererfahrung.",
+                "Beispiele für qualitative Merkmale: Umsatz, Absatz.",
+                "Qualitative Merkmale sind immer sofort und eindeutig in Mengen und Werten bestimmbar.",
+                "Quantitative Merkmale sind nicht eindeutig bestimmbar und müssen in Qualitäten transformiert werden."
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "26. Was gibt die Conversion Rate in einem Web Analytics Programm an?",
+            type: "single",
+            options: [
+                "Den prozentualen Anteil der Besucher, die irgendeine Handlung auf der Website getätigt haben.",
+                "Den prozentualen Anteil der Besucher, die eine zuvor festgelegte Handlung getätigt haben.",
+                "Den prozentualen Anteil der Besucher, die nur eine Bestellung getätigt haben.",
+                "Den prozentualen Anteil der Besucher, die etwas in den Warenkorb gelegt haben.",
+                "Den prozentualen Anteil der Besucher, die von einem Mitbewerber abgeworben wurden."
+            ],
+            correctAnswer: [1]
+        },
+        {
+            question: "27. Was wird unter der Absprungrate (Bounce Rate) verstanden?",
+            type: "single",
+            options: [
+                "Der Anteil der Besucher, die nichts bestellt haben.",
+                "Der Anteil der Besucher, die nichts in den Warenkorb gelegt haben.",
+                "Der Anteil der Besucher, die lediglich eine Minute auf der Website waren.",
+                "Der Anteil der Besucher, die nur eine einzige Seite angesehen und diese sofort verlassen haben.",
+                "Der Anteil der Besucher, die mehrere Seiten innerhalb von 30 Sekunden angesehen haben."
+            ],
+            correctAnswer: [3]
+        },
+        {
+            question: "28. Wie kann der Anteil der 'Organic Search'-Quelle für eine Website erhöht werden?",
+            type: "single",
+            options: [
+                "Durch Schalten bezahlter Anzeigen bei Google und Bing.",
+                "Durch Schalten bezahlter Anzeigen in Social-Media-Kanälen.",
+                "Durch Search Engine Optimization (SEO)-Maßnahmen für bessere Rankings.",
+                "Durch Versenden direkter Links per E-Mail an Bestandskunden.",
+                "Durch Erstellen eines QR-Codes auf Katalogen mit direktem Link zur Website."
+            ],
+            correctAnswer: [2]
+        }
+    ];
+
+    // Variablen für den Quizstatus
+    let remainingQuestions = [...questions]; // Kopie der Fragen
+    let currentQuestionIndex = null;
+    let correctAnswersCount = 0;
+    let totalQuestions = questions.length;
+
+    const questionContainer = document.getElementById('question-container');
+    const progressText = document.getElementById('current-question-number');
+    const totalQuestionsText = document.getElementById('total-questions');
+    const resultDiv = document.getElementById('result');
+    const restartButton = document.getElementById('restart');
+    const submitButton = document.getElementById('submit-answer');
+    const backButton = document.getElementById('back-button');
+
+    totalQuestionsText.textContent = totalQuestions;
+
+    function shuffle(array) {
+        let currentIndex = array.length, temporaryValue, randomIndex;
+
+        // Solange es noch Elemente zum Mischen gibt
+        while (0 !== currentIndex) {
+            // Ein verbleibendes Element auswählen
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // Vertauschen mit dem aktuellen Element
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+
+        return array;
+    }
+
+    function loadNextQuestion() {
+        resultDiv.textContent = '';
+        submitButton.style.display = 'none';
+
+        if (remainingQuestions.length === 0) {
+            // Quiz beendet
+            questionContainer.innerHTML = "<h2>Quiz beendet!</h2><p>Sie haben " + correctAnswersCount + " von " + totalQuestions + " Fragen richtig beantwortet.</p>";
+            progressText.textContent = totalQuestions;
+            restartButton.style.display = 'block';
+            return;
+        }
+
+        // Nächste Frage laden
+        currentQuestionIndex = 0; // Fragen der Reihe nach
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        // Frage anzeigen
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `
+                        <li>
+                            <label>
+                                <input type="checkbox" name="option" value="${index}">
+                                ${option}
+                            </label>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = true;
+
+            // Event Listener für Checkboxen hinzufügen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Mindestens eine Option ausgewählt
+                    submitButton.disabled = !Array.from(optionInputs).some(i => i.checked);
+                });
+            });
+        } else if (currentQuestion.type === "single") {
+            // Single-Choice-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <ul class="options">
+                    ${currentQuestion.options.map((option, index) => `<li><button data-index="${index}">${option}</button></li>`).join('')}
+                </ul>
+            `;
+            // Event Listener für Optionen hinzufügen
+            const optionButtons = document.querySelectorAll('.options button');
+            optionButtons.forEach(button => {
+                button.addEventListener('click', checkSingleAnswer);
+            });
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage
+            questionContainer.innerHTML = `
+                <div class="question">${currentQuestion.question}</div>
+                <div class="matching-container">
+                    <div class="matching-options">
+                        <strong>Optionen:</strong>
+                        <ul>
+                            ${currentQuestion.options.map(option => `<li>${option.number}. ${option.text}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="matching-items">
+                        <strong>Zuweisen:</strong>
+                        <ul>
+                            ${currentQuestion.items.map((item, index) => `
+                                <li class="matching-row">
+                                    <input type="text" maxlength="1" data-index="${index}">
+                                    <span>${item}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            submitButton.style.display = 'block';
+            submitButton.disabled = false; // Kann abgeschickt werden
+        }
+
+        // Fortschritt aktualisieren
+        progressText.textContent = totalQuestions - remainingQuestions.length + 1;
+    }
+
+    function checkSingleAnswer(event) {
+        const selectedOption = parseInt(event.target.getAttribute('data-index'));
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (selectedOption === currentQuestion.correctAnswer[0]) {
+            // Richtige Antwort
+            event.target.classList.add('correct');
+            correctAnswersCount++;
+        } else {
+            // Falsche Antwort
+            event.target.classList.add('incorrect');
+        }
+
+        // Buttons deaktivieren
+        const optionButtons = document.querySelectorAll('.options button');
+        optionButtons.forEach(button => {
+            button.disabled = true;
+            const index = parseInt(button.getAttribute('data-index'));
+            if (currentQuestion.correctAnswer.includes(index)) {
+                button.classList.add('correct');
+            }
+        });
+
+        remainingQuestions.splice(currentQuestionIndex, 1);
+
+        // Kurz warten und nächste Frage laden
+        setTimeout(loadNextQuestion, 2000);
+    }
+
+    function checkMultipleAnswer() {
+        const currentQuestion = remainingQuestions[currentQuestionIndex];
+
+        if (currentQuestion.type === "multiple") {
+            // Multiple-Choice-Frage auswerten
+            const selectedOptions = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(input => parseInt(input.value));
+
+            // Antworten sortieren für Vergleich
+            selectedOptions.sort((a, b) => a - b);
+            const correctAnswers = [...currentQuestion.correctAnswer].sort((a, b) => a - b);
+
+            const isCorrect = JSON.stringify(selectedOptions) === JSON.stringify(correctAnswers);
+
+            if (isCorrect) {
+                // Richtige Antwort
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                // Falsche Antwort
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            // Richtig/Falsch anzeigen
+            const optionInputs = document.querySelectorAll('input[name="option"]');
+            optionInputs.forEach(input => {
+                input.disabled = true;
+                const parentLabel = input.parentElement;
+                const optionIndex = parseInt(input.value);
+                if (currentQuestion.correctAnswer.includes(optionIndex)) {
+                    parentLabel.classList.add('correct');
+                } else if (input.checked) {
+                    parentLabel.classList.add('incorrect');
+                }
+            });
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 3000);
+        } else if (currentQuestion.type === "matching") {
+            // Matching-Frage auswerten
+            const inputs = document.querySelectorAll('.matching-items input[type="text"]');
+            let allCorrect = true;
+
+            inputs.forEach(input => {
+                const index = parseInt(input.getAttribute('data-index'));
+                const userAnswer = input.value.trim();
+                const correctAnswer = currentQuestion.correctAnswers[index].toString();
+
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                }
+                input.disabled = true;
+            });
+
+            if (allCorrect) {
+                resultDiv.textContent = 'Richtige Antwort!';
+                resultDiv.style.color = 'green';
+                correctAnswersCount++;
+            } else {
+                resultDiv.textContent = 'Falsche Antwort.';
+                resultDiv.style.color = 'red';
+            }
+
+            remainingQuestions.splice(currentQuestionIndex, 1);
+
+            // Nächste Frage laden
+            setTimeout(loadNextQuestion, 4000);
+        }
+    }
+
+    submitButton.addEventListener('click', checkMultipleAnswer);
+
+    restartButton.addEventListener('click', function() {
+        // Quiz zurücksetzen
+        remainingQuestions = [...questions];
+        correctAnswersCount = 0;
+        currentQuestionIndex = null;
+        restartButton.style.display = 'none';
+        resultDiv.textContent = '';
+        loadNextQuestion();
+    });
+
+    backButton.addEventListener('click', function() {
+        window.location.href = 'e-commerce lernprogramm.html';
+    });
+
+    // Quiz starten
+    shuffle(remainingQuestions);
+    loadNextQuestion();
+</script>
+
+</body>
+</html>
